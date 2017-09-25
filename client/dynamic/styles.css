@@ -1,0 +1,148 @@
+body {
+  margin: 0;
+}
+
+.container {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 768px) {
+  .container {
+    width: 750px;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    width: 970px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    width: 1170px;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.simple-button {
+  background: #4b367c;
+  font-size: 14px;
+  line-height: 20px;
+  border-radius: 3px;
+  color: #fff;
+  padding: 7px 16px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 0;
+}
+
+.link {
+  color: #4b367c;
+  text-decoration: none;
+  display: inline-block;
+  margin: 10px 0;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.h1,
+.h2 {
+  font-weight: normal;
+  margin: 0;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  color: #19171c;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.h1 {
+  font-size: 40px;
+}
+
+.h2 {
+  font-size: 30px;
+}
+
+.link-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: flex-start;
+}
+
+.link-list_row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.link-list_border {
+  border-top: 1px solid #17141f;
+  border-bottom: 1px solid #17141f;
+}
+
+.link-button-line {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  margin: 5px 0;
+}
+
+.link-button-line__item {
+  margin-right: 10px;
+}
+
+.link-button-line__item:last-child {
+  margin-right: 0;
+}
+
+.tab {
+  text-align: center;
+}
+
+.tab_hidden {
+  display: none;
+}
+
+.app-enter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 15vh;
+  background: #edeef0;
+  height: 100vh;
+  width: 100%;
+}
+
+.simple-form__input {
+  margin-bottom: 15px;
+  width: 270px;
+  padding: 6px 12px 8px;
+  height: 35px;
+  border-radius: 3px;
+  color: #000;
+  border: 1px solid #d3d9de;
+  outline: none;
+  display: block;
+}
+
+.simple-form__input:focus {
+  border-color: #c9d0d6;
+}
+
+.simple-form__input:focus::placeholder {
+  color: #c9d0d6;
+}
+
+.simple-form__input::placeholder {
+  color: #8b909a;
+}

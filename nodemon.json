@@ -1,0 +1,15 @@
+{
+  "ignore": ["node_modules", ".git", "client/**/*.*", "server/locales/**/*.*"],
+
+  "exec": "node server/index.js",
+
+  "verbose": true,
+
+  "watch": [
+    "server",
+    "config.js",
+    "webpack.*.config.js"
+  ],
+
+  "ext": "js json"
+}
