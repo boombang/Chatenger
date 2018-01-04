@@ -29,8 +29,8 @@ let UserSchema = new Schema({
     unique: true
   }
 }, {
-  versionKey: false
-});
+    versionKey: false
+  });
 
 /**
  * Virtual `code` field instead of _id

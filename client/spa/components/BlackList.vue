@@ -19,6 +19,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
   export default {
     name: 'black-list',
     data() {
@@ -28,26 +30,33 @@
     },
     created() {
       this.$emit('loadStart');
-      this.$http.get('/api/friends/showBlackList').then(response => {
-        this.users = response.body;
-        this.$emit('loadEnd');
-      }, response => {
-        this.$emit('loadEnd');
-        this.$router.go(-1);
+      axios
+      .get("/friends/showBlackList")
+      .then(response => {
+        console.log(response);
+        this.users = response.data.users;
+        this.$emit("loadEnd");
       })
+      .catch(error => {
+        this.$emit("loadEnd");
+        this.$router.go(-1);
+      });
     },
     methods: {
       removeFromBlackList(id) {
         this.$emit('loadStart');
-        this.$http.post('/api/friends/RemoveFromBlackList', JSON.stringify({
-          id: id
-        })).then(response => {
-          this.users = response.body;
-          this.$emit('loadEnd');
-        }, response => {
-          this.$emit('loadEnd');
-          this.$router.go(-1);
-        })
+        axios
+      .post("/friends/removeFromBlackList", {
+        id
+      })
+      .then(response => {
+        this.$router.push('/friends');
+        this.$emit("loadEnd");
+      })
+      .catch(error => {
+        this.$emit("loadEnd");
+        this.$router.go(-1);
+      });
       }
     }
   }

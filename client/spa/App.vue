@@ -5,6 +5,8 @@
 </template>
 
 <script>
+  import '../dynamic/styles.css';
+
   export default {
     name: 'app'
   }

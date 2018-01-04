@@ -20,7 +20,6 @@ function initSession(app, db) {
     saveUninitialized: false,
     resave: false,
     secret: "MB9x-hOkx-UdcCbOprxggu-Wv1PetuoqzBny1h8DULA",
-    httpOnly: false, //убрать, когда буду делать запрос на юзера каждую перезагрузку
     store: new MongoStore({
       url: 'mongodb://localhost/chatengerdb',
       mongooseConnection: db.connection

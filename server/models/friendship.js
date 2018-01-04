@@ -14,9 +14,9 @@ let friendshipSchema = new Schema({
     required: true
   }
 }, {
-  versionKey: false
-});
+    versionKey: false
+  });
 
-let friendship = mongoose.model("Friendship", friendshiptSchema);
+let friendship = mongoose.model("Friendship", friendshipSchema);
 
 module.exports = friendship;

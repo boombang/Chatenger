@@ -14,12 +14,12 @@
       return {
         formProps: {
           formSubmitName: "Занести",
-          httpPath: "/api/friends/addToBlackList",
+          httpPath: "/friends/addToBlackList",
           validation: () => {
             return true;
           },
           inputProps: [{
-            name: "blackedLogin",
+            name: "login",
             type: "text",
             maxlength: 30,
             placeholder: 'Введите логин',

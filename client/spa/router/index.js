@@ -1,8 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Main from 'components/Main'
-import Auth from 'components/Auth'
-import Registration from 'components/Registration'
 import Profile from 'components/Profile'
 import EditProfile from 'components/EditProfile'
 import ChangePassword from 'components/ChangePassword'
@@ -18,22 +16,6 @@ import DeleteUserFromPartyDialog from 'components/DeleteUserFromPartyDialog'
 import DialogSettings from 'components/DialogSettings'
 
 Vue.use(Router)
-
-function getCookie(name) {
-  var matches = document.cookie.match(new RegExp(
-    "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
-  ));
-  console.log(document.cookie);
-  return matches ? decodeURIComponent(matches[1]) : false;
-}
-
-function requireAuth(to, from, next) {
-  if (getCookie('sessionId')) {
-    next()
-  } else {
-    next('/auth')
-  }
-}
 
 function zeroId(to, from, next) {
   if (to.path === "/profile/0") {

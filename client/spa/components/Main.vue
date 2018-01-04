@@ -1,21 +1,23 @@
 <template>
   <div class="home">
     <template>
-      <preloader class="home__nav" :preloaderProps="preloadersProps.homeNav" v-show="!homeNavReady"></preloader>
-      <main-nav class="home__nav" :homeNavProps="homeNavProps" v-show="homeNavReady"></main-nav>
+      <preloader class="nav" :preloaderProps="preloadersProps.homeNav" v-show="!homeNavReady"></preloader>
+      <main-nav class="nav" :homeNavProps="homeNavProps" v-show="homeNavReady"></main-nav>
     </template>
     <template>
       <preloader :preloaderProps="preloadersProps.chat" v-show="!chatReady"></preloader>
-      <chat class="home__half" v-if="userInit" v-show="chatReady" @chatReady="chatReadyHandler()" :reinitChat="reinitChat"></chat>
+      <!-- <chat class="half" v-if="userInit" v-show="chatReady" @chatReady="chatReadyHandler()" :reinitChat="reinitChat"></chat> -->
     </template>
     <template>
       <preloader :preloaderProps="preloadersProps.router" v-show="!mainReady"></preloader>
-      <router-view class="home__half" @chatLoad="chatLoad()" @loadStart="loadStart()" @loadEnd="loadEnd()" v-if="userInit" v-show="mainReady"></router-view>
+      <router-view class="half" @chatLoad="chatLoad()" @loadStart="loadStart()" @loadEnd="loadEnd()" v-if="userInit" v-show="mainReady"></router-view>
     </template>
   </div>
 </template>
 
 <script>
+  import axios from 'axios';
+
   import Chat from "./Chat.vue";
   import MainNav from "./MainNav.vue";
   import Preloader from "./Preloader";
@@ -37,12 +39,6 @@
           name: 'Друзья',
           path: () => '/friends',
           clickHandler: () => {}
-        }, {
-          name: 'Выйти',
-          path: () => '/auth',
-          clickHandler: () => {
-            this.deleteCookie("Chatenger.Cookies");
-          }
         }],
         preloadersProps: {
           homeNav: {
@@ -61,34 +57,17 @@
       }
     },
     created() {
-      this.$http.get('/api/profile/getUserData').then(response => {
-        this.$store.commit("userInit", response.body);
+      axios.get('/profile/getUserData').then(response => {
+        console.log(response.data);
+        this.$store.commit("userInit", response.data);
         this.mainReady = true;
         this.homeNavReady = true;
         this.userInit = true;
-      }, response => {
-        this.deleteCookie(".AspNetCore.Cookies");
-        this.$router.push('/auth');
-      })
+      }).catch(error => {
+        console.log(error);
+      });
     },
     methods: {
-      getCookie(name) {
-        var matches = document.cookie.match(new RegExp(
-          "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
-        ));
-        return matches ? decodeURIComponent(matches[1]) : false;
-      },
-
-      deleteCookie(name, path, domain) {
-        if (this.getCookie(name)) {
-          document.cookie = name + "=" +
-            ((path) ? ";path=" + path : "") +
-            ((domain) ? ";domain=" + domain : "") +
-            ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
-        }
-        this.$store.commit("authFlag", false);
-      },
-
       loadStart() {
         this.mainReady = false;
       },
@@ -121,18 +100,20 @@
 
 </script>
 
-<style>
+<style scoped>
   .home {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: 5vh 95vh;
-    &__nav {
-      grid-column: 1 / -1;
-      grid-row: 1;
-    }
-    &__half {
-      padding: 0 30px;
-    }
+  }
+
+  .nav {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .half {
+    padding: 0 30px;
   }
 
 </style>

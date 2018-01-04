@@ -10,19 +10,19 @@ module.exports = function () {
     passwordField: "password"
   }, function (login, password, done) {
     return User.findOne({
-      login: login
+      login
     }, function (err, user) {
-      return err ?
-        done(err) :
-        user ?
-        user.comparePassword(password) ?
-        done(null, user) :
-        done(null, false, {
-          message: 'Incorrect password.'
-        }) :
-        done(null, false, {
-          message: 'Unknow username.'
-        })
+      return err
+        ? done(err)
+        : user
+          ? user.comparePassword(password)
+            ? done(null, user)
+            : done(null, false, {
+              message: 'Incorrect password.'
+            })
+          : done(null, false, {
+            message: 'Unknow username.'
+          })
     });
   }));
 };

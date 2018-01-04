@@ -12,12 +12,9 @@ export default new Vuex.Store({
     isCreator: null
   },
   mutations: {
-    authFlag(state, bool) {
-      state.isAuthorized = bool;
-    },
     userInit(state, data) {
-      state.userId = data.id;
-      state.userLogin = data.login;
+      state.userId = data.userId;
+      state.userLogin = data.userLogin;
     },
     dialogSelect(state, data) {
       state.dialogId = data.dialogId;

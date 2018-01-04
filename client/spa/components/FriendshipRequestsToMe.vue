@@ -19,6 +19,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
   export default {
     name: 'friends',
     data() {
@@ -28,40 +30,49 @@
     },
     created() {
       this.$emit('loadStart');
-      this.$http.get('/api/friends/showFriendshipRequestsToMe').then(response => {
-        this.users = response.body;
+      axios
+      .get("/friends/showFriendshipRequestsToMe")
+      .then(response => {
+        this.users = response.data.users;
         this.$emit('loadEnd');
-      }, response => {
+      })
+      .catch(error => {
         this.$emit('loadEnd');
         this.$router.go(-1);
-      })
+      });
     },
     methods: {
       cancelFriendshipRequestToMe(id) {
         this.$emit('loadStart');
-        this.$http.post('/api/friends/cancelFriendshipRequestToMe', JSON.stringify({
-          id: id
-        })).then(response => {
-          this.$router.push('/');
+        axios
+      .post('/friends/cancelFriendshipRequestToMe', {
+        id
+      })
+      .then(() => {
+        this.$router.push('/');
           this.$emit('loadEnd');
-        }, response => {
-          this.$emit('loadEnd');
+      })
+      .catch(error => {
+        this.$emit('loadEnd');
           this.$router.go(-1);
-        })
+      });
       },
       confirmFriendshipRequest(id, login) {
         this.$emit('loadStart');
         this.$emit('chatLoad');
-        this.$http.post('/api/friends/confirmFriendshipRequest', JSON.stringify({
-          id: id,
-          login: login
-        })).then(response => {
-          this.$router.push('/');
-          this.$emit('loadEnd');
-        }, response => {
-          this.$emit('loadEnd');
-          this.$router.go(-1);
+        axios
+        .post("/friends/confirmFriendshipRequest", {
+          id,
+          login
         })
+      .then(response => {
+        this.$router.push('/');
+          this.$emit('loadEnd');
+      })
+      .catch(error => {
+        this.$emit('loadEnd');
+          this.$router.go(-1);
+      });
       }
     }
   }

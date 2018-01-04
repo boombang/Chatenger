@@ -1,25 +1,24 @@
 "use strict";
 
 const passport = require("passport");
-const path = require("path");
+// const path = require("path");
 
-let User = require("../../models/user");
+const User = require("../../models/user");
 
 module.exports = function (app) {
 
   app.use(passport.initialize());
   app.use(passport.session());
 
-  passport.serializeUser(function (user, done) {
+  passport.serializeUser((user, done) => {
     done(null, user.id);
   });
 
-  passport.deserializeUser(function (id, done) {
-    User.findById(id, function (err, user) {
+  passport.deserializeUser((id, done) => {
+    User.findById(id, (err, user) => {
       err
-        ?
-        done(err) :
-        done(null, user);
+        ? done(err)
+        : done(null, user);
     });
   });
 

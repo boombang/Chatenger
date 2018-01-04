@@ -26,142 +26,164 @@
 </template>
 
 <script>
-  export default {
-    name: 'profile',
-    data() {
-      return {
-        myProfile: false,
-        userLogin: undefined,
-        userType: undefined,
-        uBlacked: undefined, //заблокирован текущий пользователь?
+import axios from "axios";
+
+export default {
+  name: "profile",
+  data() {
+    return {
+      myProfile: false,
+      userLogin: undefined,
+      userType: undefined,
+      uBlacked: undefined //заблокирован текущий пользователь?
+    };
+  },
+  watch: {
+    $route(to, from) {
+      if (to.path !== from.path) {
+        this.profileInit();
       }
-    },
-    watch: {
-      '$route' (to, from) {
-        if (to.path !== from.path) {
-          this.profileInit();
-        }
-      }
-    },
-    created() {
-      this.profileInit();
-    },
-    methods: {
-      profileInit() {
-        if (this.$route.params.id != this.$store.state.userId) {
-          this.$emit('loadStart');
-          this.myProfile = false;
-          this.$http.get(`/api/profile/getUserData/${this.$route.params.id}`).then(response => {
-            let responseBody = response.body;
-            this.userLogin = responseBody.login;
-            if ("uBlacked" in responseBody) {
-              this.uBlacked = responseBody.uBlacked;
+    }
+  },
+  created() {
+    this.profileInit();
+  },
+  methods: {
+    profileInit() {
+      if (this.$route.params.id != this.$store.state.userId) {
+        this.$emit("loadStart");
+        this.myProfile = false;
+        axios
+          .get(`/profile/getUserData/${this.$route.params.id}`)
+          .then(({ data }) => {
+            this.userLogin = data.login;
+            if ("uBlacked" in data) {
+              this.uBlacked = data.uBlacked;
             } else {
-              if ("userType" in responseBody) {
-                this.userType = responseBody.userType;
+              if ("userType" in data) {
+                this.userType = data.userType;
               }
             }
-            this.$emit('loadEnd');
-          }, response => {
-            this.$emit('loadEnd');
-            this.$router.go(-1);
+            this.$emit("loadEnd");
           })
-        } else {
-          this.myProfile = true;
-          this.userLogin = this.$store.state.userLogin;
-        }
-      },
-      removeFromBlackList() {
-        if (this.$route.params.id != this.$store.state.userId) {
-          this.$emit('loadStart');
-          this.$http.post('/api/friends/removeFromBlackList', JSON.stringify({
+          .catch(error => {
+            this.$emit("loadEnd");
+            this.$router.go(-1);
+          });
+      } else {
+        this.myProfile = true;
+        this.userLogin = this.$store.state.userLogin;
+      }
+    },
+    removeFromBlackList() {
+      if (this.$route.params.id != this.$store.state.userId) {
+        this.$emit("loadStart");
+        axios
+          .post("/friends/removeFromBlackList", {
             id: this.$route.params.id
-          })).then(response => {
+          })
+          .then(response => {
             this.uBlacked = undefined;
-            this.userType = 'other';
-            this.$emit('loadEnd');
-          }, response => {
-            this.$emit('loadEnd');
-            this.$router.go(-1);
+            this.userType = "other";
+            this.$emit("loadEnd");
           })
-        }
-      },
-      sendFriendshipRequest() {
-        if (this.$route.params.id != this.$store.state.userId) {
-          this.$emit('loadStart');
-          this.$http.post('/api/friends/sendFriendshipRequest', JSON.stringify({
+          .catch(error => {
+            this.$emit("loadEnd");
+            this.$router.go(-1);
+          });
+      }
+    },
+    sendFriendshipRequest() {
+      if (this.$route.params.id != this.$store.state.userId) {
+        this.$emit("loadStart");
+
+        axios
+          .post("/friends/sendFriendshipRequest", {
             id: this.$route.params.id
-          })).then(response => {
-            this.userType = 'frReqFromMe';
-            this.$emit('loadEnd');
-          }, response => {
-            this.$emit('loadEnd');
-            this.$router.go(-1);
           })
-        }
-      },
-      removeFriendship() {
-        if (this.$route.params.id != this.$store.state.userId) {
-          this.$emit('loadStart');
-          this.$http.post('/api/friends/removeFriendship', JSON.stringify({
+          .then(response => {
+            this.userType = "frReqFromMe";
+            this.$emit("loadEnd");
+          })
+          .catch(error => {
+            this.$emit("loadEnd");
+            this.$router.go(-1);
+          });
+      }
+    },
+    removeFriendship() {
+      if (this.$route.params.id != this.$store.state.userId) {
+        this.$emit("loadStart");
+        axios
+          .post("/friends/removeFriendship", {
             id: this.$route.params.id
-          })).then(response => {
-            this.userType = 'other';
-            this.$emit('loadEnd');
-          }, response => {
-            this.$emit('loadEnd');
-            this.$router.go(-1);
           })
-        }
-      },
-      confirmFriendshipRequest() {
-        if (this.$route.params.id != this.$store.state.userId) {
-          this.$emit('loadStart');
-          this.$http.post('/api/friends/confirmFriendshipRequest', JSON.stringify({
+          .then(response => {
+            this.userType = "other";
+            this.$emit("loadEnd");
+          })
+          .catch(error => {
+            this.$emit("loadEnd");
+            this.$router.go(-1);
+          });
+      }
+    },
+    confirmFriendshipRequest() {
+      if (this.$route.params.id != this.$store.state.userId) {
+        this.$emit("loadStart");
+
+        axios
+          .post("/friends/confirmFriendshipRequest", {
             id: this.$route.params.id
-          })).then(response => {
-            this.userType = 'friend';
-            this.$emit('loadEnd');
-          }, response => {
-            this.$emit('loadEnd');
-            this.$router.go(-1);
           })
-        }
-      },
-      cancelFriendshipRequestToMe() {
-        if (this.$route.params.id != this.$store.state.userId) {
-          this.$emit('loadStart');
-          this.$http.post('/api/friends/cancelFriendshipRequestToMe', JSON.stringify({
+          .then(response => {
+            this.userType = "friend";
+            this.$emit("loadEnd");
+          })
+          .catch(error => {
+            this.$emit("loadEnd");
+            this.$router.go(-1);
+          });
+      }
+    },
+    cancelFriendshipRequestToMe() {
+      if (this.$route.params.id != this.$store.state.userId) {
+        this.$emit("loadStart");
+        axios
+          .post("/friends/cancelFriendshipRequestToMe", {
             id: this.$route.params.id
-          })).then(response => {
-            this.userType = 'other';
-            this.$emit('loadEnd');
-          }, response => {
-            this.$emit('loadEnd');
-            this.$router.go(-1);
           })
-        }
-      },
-      cancelFriendshipRequestFromMe() {
-        if (this.$route.params.id != this.$store.state.userId) {
-          this.$emit('loadStart');
-          this.$http.post('/api/friends/cancelFriendshipRequestFromMe', JSON.stringify({
+          .then(response => {
+            this.userType = "other";
+            this.$emit("loadEnd");
+          })
+          .catch(error => {
+            this.$emit("loadEnd");
+            this.$router.go(-1);
+          });
+      }
+    },
+    cancelFriendshipRequestFromMe() {
+      if (this.$route.params.id != this.$store.state.userId) {
+        this.$emit("loadStart");
+        axios
+          .post("/friends/cancelFriendshipRequestFromMe", {
             id: this.$route.params.id
-          })).then(response => {
-            this.userType = 'other';
-            this.$emit('loadEnd');
-          }, response => {
-            this.$emit('loadEnd');
-            this.$router.go(-1);
           })
-        }
+          .then(response => {
+            this.userType = "other";
+            this.$emit("loadEnd");
+          })
+          .catch(error => {
+            this.$emit("loadEnd");
+            this.$router.go(-1);
+          });
       }
     }
   }
-
+};
 </script>
 
 <style>
-
 
 </style>

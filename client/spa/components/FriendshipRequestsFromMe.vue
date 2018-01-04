@@ -18,6 +18,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
   export default {
     name: 'friends',
     data() {
@@ -27,26 +29,32 @@
     },
     created() {
       this.$emit('loadStart');
-      this.$http.get('/api/friends/showFriendshipRequestsFromMe').then(response => {
-        this.users = response.body;
+       axios
+      .get("/friends/showFriendshipRequestsFromMe")
+      .then(response => {
+        this.users = response.data.users;
         this.$emit('loadEnd');
-      }, response => {
+      })
+      .catch(error => {
         this.$emit('loadEnd');
         this.$router.go(-1);
-      })
+      });
     },
     methods: {
       cancelFriendshipRequestFromMe(id) {
         this.$emit('loadStart');
-        this.$http.post('/api/friends/cancelFriendshipRequestFromMe', JSON.stringify({
-          id: id
-        })).then(response => {
-          this.$router.push('/');
+        axios
+      .post("/friends/cancelFriendshipRequestFromMe", {
+        id
+      })
+      .then(response => {
+        this.$router.push('/friends');
           this.$emit('loadEnd');
-        }, response => {
-          this.$emit('loadEnd');
-          this.$router.go(-1);
-        })
+      })
+      .catch(error => {
+        this.$emit('loadEnd');
+        this.$router.go(-1);
+      });
       }
     }
   }

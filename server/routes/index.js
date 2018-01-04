@@ -1,3 +1,5 @@
+const User = require('../models/user');
+
 module.exports = function (app) {
 
   app.get("/", function (req, res) {
@@ -48,5 +50,7 @@ module.exports = function (app) {
   });
 
   require("./auth")(app);
+  require("./profile")(app);
+  require("./friends")(app);
 
 }

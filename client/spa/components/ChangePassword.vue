@@ -16,7 +16,7 @@
       return {
         formProps: {
           formSubmitName: "Изменить пароль",
-          httpPath: "/api/profile/changePassword",
+          httpPath: "/profile/changePassword",
           validation: () => {
             let
               oldPasswordInput = document.querySelector('input[name="oldPassword"]'),

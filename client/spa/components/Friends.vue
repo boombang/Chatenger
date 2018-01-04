@@ -13,23 +13,28 @@
 </template>
 
 <script>
-  export default {
-    name: 'friends',
-    data() {
-      return {
-        users: []
-      }
-    },
-    created() {
-      this.$emit('loadStart');
-      this.$http.get('/api/friends/getFriends').then(response => {
-        this.users = response.body;
-        this.$emit('loadEnd');
-      }, response => {
-        this.$emit('loadEnd');
-        this.$router.go(-1);
-      })
-    }
-  }
+import axios from "axios";
 
+export default {
+  name: "friends",
+  data() {
+    return {
+      users: []
+    };
+  },
+  created() {
+    this.$emit("loadStart");
+    axios
+      .get("/friends/getFriends")
+      .then(response => {
+        console.log(response);
+        this.users = response.data.friends;
+        this.$emit("loadEnd");
+      })
+      .catch(error => {
+        this.$emit("loadEnd");
+        this.$router.go(-1);
+      });
+  }
+};
 </script>
