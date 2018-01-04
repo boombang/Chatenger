@@ -52,5 +52,6 @@ module.exports = function (app) {
   require("./auth")(app);
   require("./profile")(app);
   require("./friends")(app);
+  require("./dialogues")(app);
 
 }

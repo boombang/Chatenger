@@ -6,7 +6,7 @@
     </template>
     <template>
       <preloader :preloaderProps="preloadersProps.chat" v-show="!chatReady"></preloader>
-      <!-- <chat class="half" v-if="userInit" v-show="chatReady" @chatReady="chatReadyHandler()" :reinitChat="reinitChat"></chat> -->
+      <chat class="half" v-if="userInit" v-show="chatReady" @chatReady="chatReadyHandler()" :reinitChat="reinitChat"></chat>
     </template>
     <template>
       <preloader :preloaderProps="preloadersProps.router" v-show="!mainReady"></preloader>

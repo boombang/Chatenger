@@ -15,12 +15,12 @@
       return {
         formProps: {
           formSubmitName: "Создать диалог",
-          httpPath: "/api/dialogues/createPartyDialog",
+          httpPath: "/dialogues/createPartyDialog",
           validation: () => {
             return true
           },
           inputProps: [{
-            name: "dialogName",
+            name: "name",
             type: "text",
             maxlength: 20,
             placeholder: 'Название диалога',

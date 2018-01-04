@@ -23,6 +23,7 @@
 </template>
 
 <script>
+  import axios from "axios";
   import ChatSelect from './ChatSelect';
 
   export default {
@@ -60,56 +61,60 @@
     },
     methods: {
       chatInit() {
-        this.$http.get('/api/dialogues/initDialogues').then(response => {
-          let responseBody = response.body;
-          this.tatDialoguesId = responseBody.tatDialoguesId;
-          this.tatDialoguesNames = responseBody.tatDialoguesNames;
-          this.partyDialoguesId = responseBody.partyDialoguesId;
-          this.partyDialoguesNames = responseBody.partyDialoguesNames;
-          this.isCreator = responseBody.isCreator;
+        axios
+        .get("/dialogues/initDialogues")
+        .then(({data}) => {
+          this.tatDialoguesId = data.tatDialoguesId;
+          this.tatDialoguesNames = data.tatDialoguesNames;
+          this.partyDialoguesId = data.partyDialoguesId;
+          this.partyDialoguesNames = data.partyDialoguesNames;
+          this.isCreator = data.isCreator;
           this.$emit('chatReady');
+        })
+        .catch(error => {
+          console.log(error);
         });
       },
       dialogSelect(props) {
         let dialogType = props[0],
           dialogId = props[1];
 
-        this.messages.length = 0;
+        // this.messages.length = 0;
 
         this.dialogType = dialogType;
 
-        this.connection.onClosed = function (e) {
-          if (e) {
-            this.messages.push('Connection closed with error: ' + e);
-          } else {
-            this.messages.push('Disconnected');
-          }
-        };
+        // this.connection.onClosed = function (e) {
+        //   if (e) {
+        //     this.messages.push('Connection closed with error: ' + e);
+        //   } else {
+        //     this.messages.push('Disconnected');
+        //   }
+        // };
 
-        this.connection.on('SetUsersOnline', usersOnline => {
-          usersOnline.forEach(user => this.addUserOnline(user));
-        });
+        // this.connection.on('SetUsersOnline', usersOnline => {
+        //   usersOnline.forEach(user => this.addUserOnline(user));
+        // });
 
-        this.connection.on('UsersJoined', users => {
-          users.forEach(user => {
-            this.messages.push('Пользователь ' + user.Name + ' присоединился к чату');
-            this.addUserOnline(user);
-          });
-        });
+        // this.connection.on('UsersJoined', users => {
+        //   users.forEach(user => {
+        //     this.messages.push('Пользователь ' + user.Name + ' присоединился к чату');
+        //     this.addUserOnline(user);
+        //   });
+        // });
 
-        this.connection.on('UsersLeft', users => {
-          users.forEach(user => {
-            this.messages.push('Пользователь ' + user.Name + ' покинул чат');
-          });
-        });
+        // this.connection.on('UsersLeft', users => {
+        //   users.forEach(user => {
+        //     this.messages.push('Пользователь ' + user.Name + ' покинул чат');
+        //   });
+        // });
 
-        this.connection.on('Send', (userName, message) => {
-          this.messages.push(userName + ': ' + message);
-        });
+        // this.connection.on('Send', (userName, message) => {
+        //   this.messages.push(userName + ': ' + message);
+        // });
 
-        this.connection.start(this.transportType).catch((err) => {
-          console.log(err);
-        });
+        // this.connection.start(this.transportType).catch((err) => {
+        //   console.log(err);
+        // });
       },
 
       sendMessage() {

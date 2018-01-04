@@ -9,6 +9,8 @@
 </template>
 
 <script>
+  import axios from 'axios';
+
   export default {
     name: "add-user-to-party-dialog",
     data() {
@@ -18,15 +20,16 @@
     },
     methods: {
       submit() {
-        this.$http.post('/api/dialogues/deleteUserFromPartyDialog', {
-          dialogId: this.$store.state.dialogId,
-          userLogin: this.userLogin
-        }).then(response => {
+        axios
+        .post('/dialogues/removeUserFromPartyDialog', {
+          id: this.$store.state.dialogId,
+          login: this.userLogin
+        })
+        .then(response => {
           this.$router.push('/');
           alert('Вы успешно добавили пользователя в диалог!');
-        }, response => {
-          alert('Что-то пошло не так... Попробуйте еще разок!');
-        });
+        })
+        .catch(err => alert('Что-то пошло не так... Попробуйте еще разок!'));
       }
     }
   }

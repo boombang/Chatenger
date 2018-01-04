@@ -5,11 +5,13 @@
       <router-link class="link" to="/addUserToPartyDialog">Добавить пользователя в диалог</router-link>
       <router-link class="link" v-if="isCreator" to="/deleteUserFromPartyDialog">Удалить пользователя из диалога</router-link>
     </div>
-    <button class="simple-button" v-if="isCreator" @click="deletePartyDialog()">Удалить диалог</button>
+    <button class="simple-button" v-if="isCreator" @click="removePartyDialog">Удалить диалог</button>
   </div>
 </template>
 
 <script>
+  import axios from 'axios';
+
   export default {
     name: 'dialog-settings',
     data() {
@@ -23,16 +25,17 @@
       this.isCreator = this.$store.state.isCreator;
     },
     methods: {
-      deletePartyDialog() {
-        this.$http.post('/api/dialogues/deletePartyDialog', JSON.stringify({
-          id: this.dialogId
-        })).then(response => {
-          this.$emit('chatLoad');
-          this.$router.push('/');
-          alert('Вы успешно удалили диалог!');
-        }, response => {
-          alert('Что-то пошло не так... Повторите еще разок!');
-        })
+      removePartyDialog() {
+        axios
+          .post('/dialogues/removePartyDialog', {
+            id: this.dialogId
+          })
+          .then(response => {
+            this.$emit('chatLoad');
+            this.$router.push('/');
+            alert('Вы успешно удалили диалог!');
+          })
+          .catch(err => alert('Что-то пошло не так... Повторите еще разок!'));
       }
     }
   }
