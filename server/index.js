@@ -1,6 +1,8 @@
+let config	= require("./config");
+
 let db = require("./core/mongo")();
 let app = require("./core/express")(db);
 
-app.listen(3000, () => {
+app.listen(config.port, () => {
   console.log("Server is alive");
 });

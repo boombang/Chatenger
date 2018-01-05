@@ -24,14 +24,8 @@ function initSession(app, db) {
       url: 'mongodb://localhost/chatengerdb',
       mongooseConnection: db.connection
     }),
-    cookie: {
-      maxAge: 7 * 24 * (60 * 60 * 1000),
-      // secure: true // раскоментить при переходе на https, указать при production
-    },
-    name: "sessionId",
-    // genid: function(req) {
-    //   return genuuid() // use UUIDs for session IDs
-    // },
+    cookie: config.sessions.cookie,
+    name: config.sessions.name
   }));
 }
 
@@ -87,11 +81,11 @@ module.exports = function (db) {
   initAuth(app);
 
   // Load socket.io server
-  // let server = require("./sockets").init(app, db);
-  // server._app = app;
+  let server = require("./sockets").init(app, db);
+  server._app = app;
 
   require("../routes")(app);
   app.use(history()); //vue js history polyfill
 
-  return app;
+  return server;
 };

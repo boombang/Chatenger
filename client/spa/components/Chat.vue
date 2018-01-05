@@ -24,6 +24,8 @@
 
 <script>
   import axios from "axios";
+  import io from 'socket.io-client'
+
   import ChatSelect from './ChatSelect';
 
   export default {
@@ -45,8 +47,8 @@
         message: '',
         messages: [],
         users: [],
-        transportType: null,
-        connection: null
+        socket: null,
+        socketDialogName: ''
       }
     },
     created() {
@@ -61,6 +63,10 @@
     },
     methods: {
       chatInit() {
+        this.socket = io();
+
+        this.socket.on('chat message', msg => this.messages.push(msg));
+
         axios
         .get("/dialogues/initDialogues")
         .then(({data}) => {
@@ -79,9 +85,16 @@
         let dialogType = props[0],
           dialogId = props[1];
 
-        // this.messages.length = 0;
+        this.messages.length = 0;
+
+        if(this.socketDialogName) {
+          this.socket.emit('leave room', this.socketDialogName);
+        }
 
         this.dialogType = dialogType;
+        this.socketDialogName = `${dialogType}-${dialogId}`;
+
+        this.socket.emit('join room', this.socketDialogName);
 
         // this.connection.onClosed = function (e) {
         //   if (e) {
@@ -118,9 +131,7 @@
       },
 
       sendMessage() {
-        this.connection.invoke('Send', this.message).catch((err) => {
-          console.log(err);
-        });
+        this.socket.emit('chat message', this.message);
         this.message = '';
       },
 
