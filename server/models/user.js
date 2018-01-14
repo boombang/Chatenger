@@ -8,7 +8,6 @@ let autoIncrement = require("mongoose-auto-increment");
 let Schema = mongoose.Schema;
 
 let UserSchema = new Schema({
-  // id: Schema.Types.ObjectId,
   login: {
     type: String,
     required: true,
@@ -35,23 +34,17 @@ let UserSchema = new Schema({
 /**
  * Virtual `code` field instead of _id
  */
-UserSchema.virtual("code").get(function () {
-  return this.encodeID();
-});
+// UserSchema.virtual("code").get(function () {
+//   return this.encodeID();
+// });
 
-/**
- * Auto increment for `_id`
- */
 UserSchema.plugin(autoIncrement.plugin, {
   model: "User",
   startAt: 1
 });
 
-/**
- * Password hashing
- */
 UserSchema.pre("save", function (next) {
-  let user = this;
+  const user = this;
   if (!user.isModified("password"))
     return next();
 
@@ -60,11 +53,9 @@ UserSchema.pre("save", function (next) {
   next();
 });
 
-/**
- * Password compare
- */
 UserSchema.methods.comparePassword = function (password) {
-  return this.password == crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512');
+  const user = this;
+  return user.password == crypto.pbkdf2Sync(password, user.salt, 10000, 512, 'sha512');
 };
 
 let user = mongoose.model("User", UserSchema);

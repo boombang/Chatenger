@@ -1,7 +1,6 @@
-const {
-  check,
-  validationResult
-} = require('express-validator/check'),
+const 
+  { check, validationResult } = require('express-validator/check'),
+  { matchedData } = require('express-validator/filter'),
   crypto = require("crypto");
 
 const User = require('../models/user');
@@ -95,26 +94,12 @@ function getUserData(req, res) {
   }
 }
 
-function changePassword(req, res) {
-  check("oldPassword").isLength({
-    min: 1,
-    max: 40
-  })
-  check("newPassword").isLength({
-    min: 1,
-    max: 40
-  });
-  check("confirmNewPassword").isLength({
-    min: 1,
-    max: 40
-  });
+const changePasswordValidation = [
+	check(["oldPassword", "newPassword", "confirmNewPassword"]).isLength({min: 1, max: 40}),
+];
 
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).json({
-      errors: errors.mapped()
-    });
-  }
+function changePassword(req, res) {
+  if (!validationResult(req).isEmpty()) return res.status(404).json({err: validationResult.array()});
 
   if (req.body.newPassword !== req.body.confirmNewPassword) {
     return res.status(422).json({
@@ -128,8 +113,9 @@ function changePassword(req, res) {
     });
   }
 
-  const salt = crypto.randomBytes(128).toString('base64');
-  const password = crypto.pbkdf2Sync(req.body.newPassword, salt, 10000, 512, 'sha512');
+  const
+    salt = crypto.randomBytes(128).toString('base64'),
+    password = crypto.pbkdf2Sync(req.body.newPassword, salt, 10000, 512, 'sha512');
 
   User.update(
     { _id: req.user.id },
@@ -140,38 +126,19 @@ function changePassword(req, res) {
   );
 }
 
+const deleteAccountValidation = [
+	check(["password", "confirmNewPassword"]).isLength({min: 1, max: 40}),
+];
+
 function deleteAccount(req, res) {
-  check("password").isLength({
-    min: 1,
-    max: 40
-  })
-  check("confirmNewPassword").isLength({
-    min: 1,
-    max: 40
-  });
-
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    // return res.status(422).json({
-    //   errors: errors.mapped()
-    // });
+  if (!validationResult(req).isEmpty()) 
     return res.render('index');
-  }
 
-  if (req.body.password !== req.body.confirmPassword) {
-    // return res.status(422).json({
-    //   message: 'Passwords do not match'
-    // });
+  if (req.body.password !== req.body.confirmPassword) 
     return res.render('index');
-  }
-
-  if (crypto.pbkdf2Sync(req.body.password, req.user.salt, 10000, 512, 'sha512') != req.user.password) {
+  
+  if (crypto.pbkdf2Sync(req.body.password, req.user.salt, 10000, 512, 'sha512') != req.user.password) 
     return res.render('index');
-    // return res.status(422).json({
-    //   message: 'Incorrect password'
-    // });
-  }
 
   User.remove({ _id: req.user.id }, err => {
     if (err) {
@@ -186,6 +153,12 @@ function deleteAccount(req, res) {
 
 module.exports = {
   getUserData,
-  changePassword,
-  deleteAccount
+  changePassword: {
+    validation: changePasswordValidation,
+    method: changePassword
+  },
+  deleteAccount: {
+    validation: deleteAccountValidation,
+    method: deleteAccount
+  }
 }

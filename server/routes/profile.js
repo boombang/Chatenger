@@ -1,13 +1,13 @@
 const router = require('express').Router();
 
-const profileCtrl = require('../controllers/profile');
+const controller = require('../controllers/profile');
 
 module.exports = function (app) {
-  router.route('/getUserData/:id?').get(profileCtrl.getUserData);
+  router.route('/getUserData/:id?').get(controller.getUserData);
 
-  router.route('/changePassword').post(profileCtrl.changePassword);
+  router.route('/changePassword').post(controller.changePassword.validation, controller.changePassword.method);
 
-  router.route('/deleteAccount').post(profileCtrl.deleteAccount);
+  router.route('/deleteAccount').post(controller.deleteAccount.validation, controller.deleteAccount.method);
 
   app.use("/profile", router);
 };

@@ -1,29 +1,29 @@
 const router = require('express').Router();
 
-const friendsCtrl = require('../controllers/friends');
+const controller = require('../controllers/friends');
 
 module.exports = function (app) {
-    router.route('/getFriends').get(friendsCtrl.getFriends);
+    router.route('/getFriends').get(controller.getFriends);
 
-    router.route('/sendFriendshipRequest').post(friendsCtrl.sendFriendshipRequest);
+    router.route('/sendFriendshipRequest').post(controller.sendFriendshipRequest);
 
-    router.route('/confirmFriendshipRequest').post(friendsCtrl.confirmFriendshipRequest);
+    router.route('/confirmFriendshipRequest').post(controller.confirmFriendshipRequest);
 
-    router.route('/showFriendshipRequestsToMe').get(friendsCtrl.showFriendshipRequestsToMe);
+    router.route('/showFriendshipRequestsToMe').get(controller.showFriendshipRequestsToMe);
 
-    router.route('/showFriendshipRequestsFromMe').get(friendsCtrl.showFriendshipRequestsFromMe);
+    router.route('/showFriendshipRequestsFromMe').get(controller.showFriendshipRequestsFromMe);
 
-    router.route('/cancelFriendshipRequestFromMe').post(friendsCtrl.cancelFriendshipRequestFromMe);
+    router.route('/cancelFriendshipRequestFromMe').post(controller.cancelFriendshipRequestFromMe);
 
-    router.route('/cancelFriendshipRequestToMe').post(friendsCtrl.cancelFriendshipRequestToMe);
+    router.route('/cancelFriendshipRequestToMe').post(controller.cancelFriendshipRequestToMe);
 
-    router.route('/removeFriendship').post(friendsCtrl.removeFriendship);
+    router.route('/removeFriendship').post(controller.removeFriendship);
 
-    router.route('/showBlackList').get(friendsCtrl.showBlackList);
+    router.route('/showBlackList').get(controller.showBlackList);
 
-    router.route('/addToBlackList').post(friendsCtrl.addToBlackList);
+    router.route('/addToBlackList').post(controller.addToBlackList.validation, controller.addToBlackList.method);
 
-    router.route('/removeFromBlackList').post(friendsCtrl.removeFromBlackList);
+    router.route('/removeFromBlackList').post(controller.removeFromBlackList);
     
     app.use("/friends", router);
 };

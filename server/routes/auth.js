@@ -1,29 +1,15 @@
 const router = require('express').Router();
-const passport = require("passport");
 
-const User = require('../models/user');
+const controller = require('../controllers/auth');
+
 
 module.exports = function (app) {
 
-  router.route('/auth-local').post(function (req, res, next) {
-    passport.authenticate("local", function (err, user, info) {
-      return err ?
-        next(err) :
-        user ?
-          req.logIn(user, function (err) {
-            return err ?
-              next(err) :
-              res.redirect('/');
-          }) :
-          res.redirect('/welcome');
-    })(req, res, next);
-  });
+  router.route('/auth-local').post(controller.authLocal);
 
-  router.route('/logout').get(function (req, res) {
-    req.logout();
-    req.session.destroy();
-    res.redirect("/");
-  });
+  router.route('/signup').post(controller.signUp.validation, controller.signUp.method);
+
+  router.route('/logout').get(controller.logOut);
 
   app.use("/auth", router);
 };

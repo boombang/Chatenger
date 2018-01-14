@@ -1,3 +1,6 @@
+const { check, validationResult } = require('express-validator/check');
+const { matchedData } = require('express-validator/filter');
+
 const User = require('../models/user');
 const Friendship = require('../models/friendship');
 const FriendshipRequest = require('../models/friendshipRequest');
@@ -101,6 +104,8 @@ function showFriendshipRequestsFromMe(req, res) {
 }
 
 function removeFriendship(req, res) {
+    if(Number(req.body.id) < 1) return res.status(404).json({err: 'invalid id'});
+
     Friendship.findOne({
         $or: [{
                 firstFriendId: req.body.id,
@@ -133,6 +138,8 @@ function sendFriendshipRequest(req, res) {
     const myId = req.user.id,
         userId = req.body.id;
 
+    if(Number(userId) < 1) return res.status(404).json({err: 'invalid id'});
+
     FriendshipRequest.findOne({
         userIdRequestFrom: myId,
         userIdRequestTo: userId
@@ -161,6 +168,8 @@ function sendFriendshipRequest(req, res) {
 }
 
 function cancelFriendshipRequestFromMe(req, res) {
+    if(Number(req.body.id) < 1) return res.status(404).json({err: 'invalid id'});
+
     FriendshipRequest.findOne({
             userIdRequestTo: req.body.id,
             userIdRequestFrom: req.user.id
@@ -184,6 +193,8 @@ function cancelFriendshipRequestFromMe(req, res) {
 }
 
 function cancelFriendshipRequestToMe(req, res) {
+    if(Number(req.body.id) < 1) return res.status(404).json({err: 'invalid id'});
+
     FriendshipRequest.findOne({
         userIdRequestTo: req.user.id,
         userIdRequestFrom: req.body.id
@@ -209,6 +220,8 @@ function cancelFriendshipRequestToMe(req, res) {
 function confirmFriendshipRequest(req, res) {
     const myId = req.user.id,
         userId = req.body.id;
+
+    if(Number(userId) < 1) return res.status(404).json({err: 'invalid id'});
 
     FriendshipRequest.findOne({
         userIdRequestFrom: userId,
@@ -275,9 +288,16 @@ function showBlackList(req, res) {
     })
 }
 
+
+const addToBlackListValidation = [
+    check("login").trim().isLength({min: 1, max: 30})
+];
+
 function addToBlackList(req, res) {
+    if (!validationResult(req).isEmpty()) return res.status(404).json({err: validationResult.array()});
+
     User.findOne({
-        login: req.body.login
+        login: matchedData(req).login
     }, (err, result) => {
         if (err) return res.sendStatus(404).json({
             msg: 'database error'
@@ -332,6 +352,8 @@ function addToBlackList(req, res) {
 }
 
 function removeFromBlackList(req, res) {
+    if(Number(req.body.id) < 1) return res.status(404).json({err: 'invalid id'});
+
     BlackList.findOneAndRemove({
         blackedUserId: req.body.id,
         userId: req.user.id
@@ -352,6 +374,9 @@ module.exports = {
     cancelFriendshipRequestToMe,
     removeFriendship,
     showBlackList,
-    addToBlackList,
+    addToBlackList: {
+        validation: addToBlackListValidation,
+        method: addToBlackList
+    },
     removeFromBlackList
 }

@@ -1,3 +1,6 @@
+const { check, validationResult } = require('express-validator/check');
+const { matchedData } = require('express-validator/filter');
+
 const User = require('../models/user');
 const Friendship = require('../models/friendship');
 const PartyDialog = require('../models/partyDialog');
@@ -62,11 +65,17 @@ function initDialogues(req, res) {
         .catch(err => res.status(404).json(err));
 }
 
+const createPartyDialogValidation = [
+    check("name").trim().isLength({min: 1, max: 30})
+];
+
 function createPartyDialog(req, res) {
+    if (!validationResult(req).isEmpty()) return res.status(404).json({err: validationResult.array()});
+
     PartyDialog
         .create({
             creatorId: req.user.id,
-            name: req.body.name,
+            name: matchedData(req).name,
             members: [{
                 id: req.user.id,
                 login: req.user.login
@@ -77,17 +86,26 @@ function createPartyDialog(req, res) {
 }
 
 function removePartyDialog(req, res) {
+    if(Number(req.body.id) < 1) return res.status(404).json({err: 'invalid id'});
+
     PartyDialog
-        .findByIdAndRemove(req.body.id)
+        .findByIdAndRemove(matchedData(req).id)
         .then(result => res.sendStatus(200))
         .catch(err => res.status(404).json({err}));
 }
 
+const addUserToPartyDialogValidation = [
+    check("id").isLength({min: 1}),
+    check("login").trim().isLength({min: 1, max: 30})
+];
+
 function addUserToPartyDialog(req, res) {
+    if (!validationResult(req).isEmpty()) return res.status(404).json({err: validationResult.array()});
+    
     PartyDialog
-        .findById(req.body.id)
+        .findById(matchedData(req).id)
         .then(dialog => new Promise((res, rej) => {
-            User.findOne({ login: req.body.login}, (err, user) => {
+            User.findOne({ login: matchedData(req).login}, (err, user) => {
                 if(err) rej(err);
 
                 user 
@@ -113,11 +131,16 @@ function addUserToPartyDialog(req, res) {
         .catch(err => res.status(404).json(err));
 }
 
+const removeUserFromPartyDialogValidation = [
+    check("id").isLength({min: 1}),
+    check("login").trim().isLength({min: 1, max: 30})
+];
+
 function removeUserFromPartyDialog(req, res) {
     PartyDialog
-    .findById(req.body.id)
+    .findById(matchedData(req).id)
     .then(dialog => new Promise((res, rej) => {
-        User.findOne({ login: req.body.login}, (err, user) => {
+        User.findOne({ login: matchedData(req).login}, (err, user) => {
             if(err) rej(err);
 
             user 
@@ -143,8 +166,17 @@ function removeUserFromPartyDialog(req, res) {
 
 module.exports = {
     initDialogues,
-    createPartyDialog,
+    createPartyDialog: {
+        validation: createPartyDialogValidation,
+        method: createPartyDialog
+    },
     removePartyDialog,
-    addUserToPartyDialog,
-    removeUserFromPartyDialog
+    addUserToPartyDialog: {
+        validation: addUserToPartyDialogValidation,
+        method: addUserToPartyDialog
+    },
+    removeUserFromPartyDialog: {
+        validation: removeUserFromPartyDialogValidation,
+        method: removeUserFromPartyDialog
+    }
 }

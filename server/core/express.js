@@ -1,7 +1,6 @@
 const express = require("express");
 const path = require('path');
 const history = require('connect-history-api-fallback');
-const validator = require("express-validator");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
@@ -56,7 +55,6 @@ function initMiddleware(app) {
   app.use(bodyParser.urlencoded({
     extended: true
   }));
-  app.use(validator());
   app.use(bodyParser.json()); //потестить с json с клиента
 
   if (config.isProductionMode()) {
