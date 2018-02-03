@@ -5,17 +5,17 @@ const { matchedData } = require('express-validator/filter');
 const User = require('../models/user');
 
 function authLocal(req, res, next) {
-    passport.authenticate("local", (err, user, info) => {
-        return err ?
-            next(err) :
-            user
-                ? req.logIn(user, function (err) {
-                    return err ?
-                        next(err) :
-                        res.redirect('/');
-                })
-                : res.redirect('/welcome');
-    })(req, res, next);
+  passport.authenticate("local", (err, user, info) => {
+    return err ?
+      next(err) :
+        user
+          ? req.logIn(user, function (err) {
+            return err ?
+              next(err) :
+              res.redirect('/');
+            })
+          : res.redirect('/welcome');
+  })(req, res, next);
 }
 
 const signUpValidation = [
@@ -39,11 +39,9 @@ function signUp(req, res) {
             password:bodyData.password,
             email: bodyData.email
           });
-        } else {
-          return res.redirect('/');
-        }
+        } else return res.redirect('/');
       })
-      .then(user => res.redirect('/'))
+      .then(() => res.redirect('/'))
       .catch(err => res.redirect('/'));
   }
 

@@ -5,13 +5,25 @@ let Schema = mongoose.Schema;
 
 
 let friendshipRequestSchema = new Schema({
-  userIdRequestTo: {
-    type: Number,
-    required: true
+  userRequestTo: {
+    id: {
+      type: Number,
+      required: true
+    },
+    login: {
+      type: String,
+      required: true
+    }
   },
-  userIdRequestFrom: {
-    type: Number,
-    required: true
+  userRequestFrom: {
+    id: {
+      type: Number,
+      required: true
+    },
+    login: {
+      type: String,
+      required: true
+    }
   }
 }, {
   versionKey: false

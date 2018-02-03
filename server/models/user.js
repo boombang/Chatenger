@@ -10,20 +10,17 @@ let Schema = mongoose.Schema;
 let UserSchema = new Schema({
   login: {
     type: String,
-    required: true,
     maxlength: 30,
     unique: true
   },
   password: {
-    type: String,
-    required: true
+    type: String
   },
   salt: {
     type: Buffer,
   },
   email: {
     type: String,
-    required: true,
     maxlength: 129,
     unique: true
   }

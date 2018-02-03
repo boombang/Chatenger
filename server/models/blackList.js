@@ -5,13 +5,25 @@ let Schema = mongoose.Schema;
 
 
 let blackListSchema = new Schema({
-  blackedUserId: {
-    type: Number,
-    required: true
+  blackedUser: {
+    id: {
+      type: Number,
+      required: true
+    },
+    login: {
+      type: String,
+      required: true
+    }
   },
-  userId: {
-    type: Number,
-    required: true
+  user: {
+    id: {
+      type: Number,
+      required: true
+    },
+    login: {
+      type: String,
+      required: true
+    }
   }
 }, {
   versionKey: false

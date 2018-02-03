@@ -52,7 +52,7 @@
       }
     },
     created() {
-      this.chatInit();
+      // this.chatInit();
     },
     watch: {
       reinitChat: {

@@ -5,13 +5,25 @@ let Schema = mongoose.Schema;
 
 
 let friendshipSchema = new Schema({
-  firstFriendId: {
-    type: Number,
-    required: true
+  firstUser: {
+    id: {
+      type: Number,
+      required: true
+    },
+    login: {
+      type: String,
+      required: true
+    }
   },
-  secondFriendId: {
-    type: Number,
-    required: true
+  secondUser: {
+    id: {
+      type: Number,
+      required: true
+    },
+    login: {
+      type: String,
+      required: true
+    }
   }
 }, {
     versionKey: false

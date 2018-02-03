@@ -5,10 +5,15 @@ let Schema = mongoose.Schema;
 
 
 let partyDialogSchema = new Schema({
-  id: Schema.Types.ObjectId,
-  creatorId: {
-    type: Number,
-    required: true
+  creator: {
+    id: {
+      type: Number,
+      required: true
+    },
+    login: {
+      type: String,
+      required: true
+    }    
   },
   name: {
     type: String,
