@@ -33,7 +33,7 @@
         reinitChat: false,
         homeNavProps: [{
           name: 'Профиль',
-          path: () => `/profile/${this.getUserId}`,
+          path: () => `/profile/${this.$store.state.userLogin}`,
           clickHandler: () => {}
         }, {
           name: 'Друзья',
@@ -84,11 +84,6 @@
       chatReadyHandler() {
         this.chatReady = true;
         this.reinitChat = false;
-      }
-    },
-    computed: {
-      getUserId() {
-        return this.$store.state.userId
       }
     },
     components: {

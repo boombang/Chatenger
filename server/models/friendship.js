@@ -5,29 +5,17 @@ let Schema = mongoose.Schema;
 
 
 let friendshipSchema = new Schema({
-  firstUser: {
-    id: {
-      type: Number,
-      required: true
-    },
-    login: {
-      type: String,
-      required: true
-    }
+  firstFriend: {
+    type: Schema.Types.ObjectId, 
+    ref: 'User',
+    required: true
   },
-  secondUser: {
-    id: {
-      type: Number,
-      required: true
-    },
-    login: {
-      type: String,
-      required: true
-    }
+  secondFriend: {
+    type: Schema.Types.ObjectId, 
+    ref: 'User',
+    required: true
   }
-}, {
-    versionKey: false
-  });
+});
 
 let friendship = mongoose.model("Friendship", friendshipSchema);
 

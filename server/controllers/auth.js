@@ -20,8 +20,7 @@ function authLocal(req, res, next) {
 
 const signUpValidation = [
 	check("login").trim().isLength({min: 1, max: 30}),
-	check(["password", "confirmPassword"]).isLength({min: 1, max: 40}),
-	check("email").trim().isEmail().isLength({min: 1, max: 129})
+	check(["password", "confirmPassword"]).isLength({min: 1, max: 40})
 ];
 
 function signUp(req, res) {
@@ -30,16 +29,14 @@ function signUp(req, res) {
     User
       .findOne({ login: matchedData(req).login })
       .exec()
-      .catch(err => res.redirect('/'))
       .then(user => {
         if (!user) {
           const bodyData = matchedData(req);
           return User.create({
             login: bodyData.login,
-            password:bodyData.password,
-            email: bodyData.email
+            password: bodyData.password
           });
-        } else return res.redirect('/');
+        } 
       })
       .then(() => res.redirect('/'))
       .catch(err => res.redirect('/'));

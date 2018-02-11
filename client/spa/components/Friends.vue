@@ -7,7 +7,7 @@
       <router-link class="link" to="/blackList">Черный список</router-link>
     </div>
     <div class="link-list">
-      <router-link class="link" v-for="user in users" :to="'/profile/' + user.id" :key="user.id">{{user.login}}</router-link>
+      <router-link class="link" v-for="user in users" :to="'/profile/' + user.login" :key="user.id">{{user.login}}</router-link>
     </div>
   </div>
 </template>
@@ -26,9 +26,8 @@ export default {
     this.$emit("loadStart");
     axios
       .get("/friends/getFriends")
-      .then(response => {
-        console.log(response);
-        this.users = response.data.friends;
+      .then(({data}) => {
+        this.users = data;
         this.$emit("loadEnd");
       })
       .catch(error => {

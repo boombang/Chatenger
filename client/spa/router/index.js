@@ -17,8 +17,8 @@ import DialogSettings from 'components/DialogSettings'
 
 Vue.use(Router)
 
-function zeroId(to, from, next) {
-  if (to.path === "/profile/0") {
+function emptyLogin(to, from, next) {
+  if (to.path === "/profile/") {
     next(false);
   } else {
     next()
@@ -30,9 +30,9 @@ export default new Router({
     path: '/',
     component: Main,
     children: [{
-      path: 'profile/:id',
+      path: 'profile/:login',
       component: Profile,
-      beforeEnter: zeroId,
+      beforeEnter: emptyLogin,
     }, {
       path: 'editprofile',
       component: EditProfile

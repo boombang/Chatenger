@@ -34,6 +34,7 @@ export default {
     return {
       myProfile: false,
       userLogin: undefined,
+      userId: undefined,
       userType: undefined,
       uBlacked: undefined //заблокирован текущий пользователь?
     };
@@ -50,13 +51,14 @@ export default {
   },
   methods: {
     profileInit() {
-      if (this.$route.params.id != this.$store.state.userId) {
+      if (this.$route.params.login != this.$store.state.userLogin) {
         this.$emit("loadStart");
         this.myProfile = false;
         axios
-          .get(`/profile/getUserData/${this.$route.params.id}`)
+          .get(`/profile/getUserData/${this.$route.params.login}`)
           .then(({ data }) => {
             this.userLogin = data.login;
+            this.userId = data.id;
             if ("uBlacked" in data) {
               this.uBlacked = data.uBlacked;
             } else {
@@ -76,11 +78,11 @@ export default {
       }
     },
     removeFromBlackList() {
-      if (this.$route.params.id != this.$store.state.userId) {
+      if (this.$route.params.login != this.$store.state.userLogin) {
         this.$emit("loadStart");
         axios
           .post("/friends/removeFromBlackList", {
-            id: this.$route.params.id
+            id: this.userId
           })
           .then(response => {
             this.uBlacked = undefined;
@@ -94,12 +96,12 @@ export default {
       }
     },
     sendFriendshipRequest() {
-      if (this.$route.params.id != this.$store.state.userId) {
+      if (this.$route.params.login != this.$store.state.userLogin) {
         this.$emit("loadStart");
 
         axios
           .post("/friends/sendFriendshipRequest", {
-            id: this.$route.params.id
+            id: this.userId
           })
           .then(response => {
             this.userType = "frReqFromMe";
@@ -112,11 +114,11 @@ export default {
       }
     },
     removeFriendship() {
-      if (this.$route.params.id != this.$store.state.userId) {
+      if (this.$route.params.login != this.$store.state.userLogin) {
         this.$emit("loadStart");
         axios
           .post("/friends/removeFriendship", {
-            id: this.$route.params.id
+            id: this.userId
           })
           .then(response => {
             this.userType = "other";
@@ -129,12 +131,12 @@ export default {
       }
     },
     confirmFriendshipRequest() {
-      if (this.$route.params.id != this.$store.state.userId) {
+      if (this.$route.params.login != this.$store.state.userLogin) {
         this.$emit("loadStart");
 
         axios
           .post("/friends/confirmFriendshipRequest", {
-            id: this.$route.params.id
+            id: this.userId
           })
           .then(response => {
             this.userType = "friend";
@@ -147,11 +149,11 @@ export default {
       }
     },
     cancelFriendshipRequestToMe() {
-      if (this.$route.params.id != this.$store.state.userId) {
+      if (this.$route.params.login != this.$store.state.userLogin) {
         this.$emit("loadStart");
         axios
           .post("/friends/cancelFriendshipRequestToMe", {
-            id: this.$route.params.id
+            id: this.userId
           })
           .then(response => {
             this.userType = "other";
@@ -164,11 +166,11 @@ export default {
       }
     },
     cancelFriendshipRequestFromMe() {
-      if (this.$route.params.id != this.$store.state.userId) {
+      if (this.$route.params.login != this.$store.state.userLogin) {
         this.$emit("loadStart");
         axios
           .post("/friends/cancelFriendshipRequestFromMe", {
-            id: this.$route.params.id
+            id: this.userId
           })
           .then(response => {
             this.userType = "other";

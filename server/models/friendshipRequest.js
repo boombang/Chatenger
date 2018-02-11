@@ -6,27 +6,15 @@ let Schema = mongoose.Schema;
 
 let friendshipRequestSchema = new Schema({
   userRequestTo: {
-    id: {
-      type: Number,
-      required: true
-    },
-    login: {
-      type: String,
-      required: true
-    }
+    type: Schema.Types.ObjectId, 
+    ref: 'User',
+    required: true
   },
   userRequestFrom: {
-    id: {
-      type: Number,
-      required: true
-    },
-    login: {
-      type: String,
-      required: true
-    }
+    type: Schema.Types.ObjectId, 
+    ref: 'User',
+    required: true
   }
-}, {
-  versionKey: false
 });
 
 let friendshipRequest = mongoose.model("FriendshipRequest", friendshipRequestSchema);

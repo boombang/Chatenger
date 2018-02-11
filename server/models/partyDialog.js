@@ -6,14 +6,9 @@ let Schema = mongoose.Schema;
 
 let partyDialogSchema = new Schema({
   creator: {
-    id: {
-      type: Number,
-      required: true
-    },
-    login: {
-      type: String,
-      required: true
-    }    
+    type: Schema.Types.ObjectId, 
+    ref: 'User',
+    required: true
   },
   name: {
     type: String,
@@ -21,12 +16,9 @@ let partyDialogSchema = new Schema({
     maxlength: 30
   },
   members: [{
-    id: Number,
-    login: String
+    type: Schema.Types.ObjectId, 
+    ref: 'User'
   }]
-}, {
-  versionKey: false,
-  usePushEach: true
 });
 
 let partyDialog = mongoose.model("PartyDialog", partyDialogSchema);

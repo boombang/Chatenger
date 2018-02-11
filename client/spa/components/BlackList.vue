@@ -9,8 +9,8 @@
     </div>
     <div class="link-list">
       <template v-for="user in users">
-        <div class="link-button-line">
-          <router-link class="link link-button-line__item" :to="'/profile/' + user.id" :key="user.id">{{user.login}}</router-link>
+        <div class="link-button-line" :key="user.id">
+          <router-link class="link link-button-line__item" :to="'/profile/' + user.login" :key="user.id">{{user.login}}</router-link>
           <button class="simple-button link-button-line__item" @click="removeFromBlackList(user.id)">Удалить из черного списка</button>
         </div>
       </template>
@@ -32,9 +32,8 @@ import axios from 'axios';
       this.$emit('loadStart');
       axios
       .get("/friends/showBlackList")
-      .then(response => {
-        console.log(response);
-        this.users = response.data.users;
+      .then(({data}) => {
+        this.users = data;
         this.$emit("loadEnd");
       })
       .catch(error => {

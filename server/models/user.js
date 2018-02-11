@@ -1,9 +1,7 @@
 "use strict";
 
-let bcrypt = require("bcrypt-nodejs");
 let crypto = require("crypto");
 let mongoose = require("mongoose");
-let autoIncrement = require("mongoose-auto-increment");
 
 let Schema = mongoose.Schema;
 
@@ -11,22 +9,17 @@ let UserSchema = new Schema({
   login: {
     type: String,
     maxlength: 30,
-    unique: true
+    unique: true,
+    required: true
   },
   password: {
-    type: String
+    type: String,
+    required: true
   },
   salt: {
-    type: Buffer,
-  },
-  email: {
-    type: String,
-    maxlength: 129,
-    unique: true
+    type: Buffer
   }
-}, {
-    versionKey: false
-  });
+});
 
 /**
  * Virtual `code` field instead of _id
@@ -35,10 +28,9 @@ let UserSchema = new Schema({
 //   return this.encodeID();
 // });
 
-UserSchema.plugin(autoIncrement.plugin, {
-  model: "User",
-  startAt: 1
-});
+// UserSchema.query.byLogin = function(login) {
+//   return this.findOne({ login });
+// };
 
 UserSchema.pre("save", function (next) {
   const user = this;

@@ -11,22 +11,26 @@ function initDialogues(req, res) {
 
     queryPromises.push(Friendship.find({
         $or: [{
-                firstFriendId: myId
+                firstFriend: myId
             }, {
-                secondFriendId: myId
+                secondFriend: myId
             }]
-    }))
+    })
+    .populate('firstFriend', 'login')
+    .populate('secondFriend', 'login')
+)
 
     queryPromises.push(PartyDialog
         .find({
-            "members.id": req.user.id
+            members: req.user.id
         })
+        .populate('creator', 'id')
     );
 
     Promise.all(queryPromises)
-        .then(result => {
-            const friendshipResult = result[0],
-                partyDialogResult = result[1],
+        .then(documents => {
+            const friendships = documents[0],
+                partyDialogues = documents[1],
                 tatDialoguesId = [],
                 tatDialoguesNames = [],
                 partyDialoguesId = [],
@@ -35,32 +39,21 @@ function initDialogues(req, res) {
 
             let queryPromises = [];
 
-            friendshipResult.forEach(note => {
-                let queryId;
-                note.firstFriendId == myId
-                    ? queryId = note.secondFriendId
-                    : queryId = note.firstFriendId;
-                
-                queryPromises.push(User.findById(queryId));
+            friendships.forEach(friendship => {
+                tatDialoguesId.push(friendship.id);
+                let tatDialogName = friendship.firstFriend.id == myId
+                    ? friendship.secondFriend.login
+                    : friendship.firstFriend.login;
+                tatDialoguesNames.push(tatDialogName);
             });
 
-            Promise
-                .all(queryPromises)
-                .then(result => {
-                    result.forEach(note => {
-                        tatDialoguesId.push(tatDialoguesId.length + 1);
-                        tatDialoguesNames.push(note.login);
-                    });
-                    res.json({ tatDialoguesId, tatDialoguesNames, partyDialoguesId, partyDialoguesNames, isCreator });
-                })
-                .catch(err => res.status(404).json(err));
-
-
-            partyDialogResult.forEach(pd => {
-                partyDialoguesId.push(pd._id);
-                partyDialoguesNames.push(pd.name);
-                isCreator.push(pd.creatorId == myId);
+            partyDialogues.forEach(partyDialog=> {
+                partyDialoguesId.push(partyDialog.id);
+                partyDialoguesNames.push(partyDialog.name);
+                isCreator.push(partyDialog.creator.id == myId);
             });
+
+            res.json({ tatDialoguesId, tatDialoguesNames, partyDialoguesId, partyDialoguesNames, isCreator });
         })
         .catch(err => res.status(404).json(err));
 }
@@ -70,98 +63,97 @@ const createPartyDialogValidation = [
 ];
 
 function createPartyDialog(req, res) {
-    if (!validationResult(req).isEmpty()) return res.status(404).json({err: validationResult.array()});
+	if (!validationResult(req).isEmpty()) return res.status(404).json({err: validationResult.array()});
 
-    PartyDialog
-        .create({
-            creatorId: req.user.id,
-            name: matchedData(req).name,
-            members: [{
-                id: req.user.id,
-                login: req.user.login
-            }]
-        })
-        .then(result => res.sendStatus(200))
-        .catch(err => res.status(404).json({err}));
+	PartyDialog
+		.create({
+				creator: req.user.id,
+				name: matchedData(req).name
+		})
+		.then(partyDialog => {
+			partyDialog.members.push(req.user.id);
+			partyDialog.save();
+		})
+		.then(() => res.sendStatus(200))
+		.catch(err => res.status(404).json({err}));
 }
 
 function removePartyDialog(req, res) {
-    if(Number(req.body.id) < 1) return res.status(404).json({err: 'invalid id'});
-
-    PartyDialog
-        .findByIdAndRemove(matchedData(req).id)
-        .then(result => res.sendStatus(200))
-        .catch(err => res.status(404).json({err}));
+	if(!req.body.id) return res.status(404).json({err: 'invalid id'});
+	
+	PartyDialog
+		.findById(req.body.id)
+		.populate('creator', 'id')
+		.then(partyDialog => {
+			if(partyDialog.creator.id === req.user.id) return partyDialog.remove();			
+		})
+		.then(result => res.sendStatus(200))
+		.catch(err => res.status(404).json({err}));
 }
 
 const addUserToPartyDialogValidation = [
-    check("id").isLength({min: 1}),
+    check("id").exists(),
     check("login").trim().isLength({min: 1, max: 30})
 ];
 
 function addUserToPartyDialog(req, res) {
-    if (!validationResult(req).isEmpty()) return res.status(404).json({err: validationResult.array()});
-    
-    PartyDialog
-        .findById(matchedData(req).id)
-        .then(dialog => new Promise((res, rej) => {
-            User.findOne({ login: matchedData(req).login}, (err, user) => {
-                if(err) rej(err);
+	if (!validationResult(req).isEmpty()) return res.status(404).json({err: validationResult.array()});
 
-                user 
-                    ? res([
-                            dialog, 
-                            user
-                    ])
-                    : rej();
-            });
-        }))
-        .then(result => {
-            const dialog = result[0],
-            user = result[1];
-            dialog.members.push({
-                id: user.id,
-                login: user.login
-            });
-            dialog.save(err => {
-                if (err) return res.status(404).json(err);
-                return res.sendStatus(200);
-              });
-        })
-        .catch(err => res.status(404).json(err));
+	let partyDialog, user;
+	
+	PartyDialog
+		.findById(matchedData(req).id)
+		.populate('creator', 'id')
+		.then(document => {
+			partyDialog = document;
+			if(partyDialog && partyDialog.creator.id === req.user.id) {
+				return User.findOne({login: matchedData(req).login})
+			}
+		})
+		.then(document => {
+			user = document;
+
+			if(user) {
+				partyDialog.members.push(user.id);
+				partyDialog.save();
+			}
+		})
+		.then(() => res.sendStatus(200))
+		.catch(err => res.status(404).json(err));
 }
 
 const removeUserFromPartyDialogValidation = [
-    check("id").isLength({min: 1}),
+    check("id").exists(),
     check("login").trim().isLength({min: 1, max: 30})
 ];
 
 function removeUserFromPartyDialog(req, res) {
-    PartyDialog
-    .findById(matchedData(req).id)
-    .then(dialog => new Promise((res, rej) => {
-        User.findOne({ login: matchedData(req).login}, (err, user) => {
-            if(err) rej(err);
+	if (!validationResult(req).isEmpty()) return res.status(404).json({err: validationResult.array()});
 
-            user 
-                ? res([
-                        dialog, 
-                        user
-                ])
-                : rej();
-        });
-    }))
-    .then(result => {
-        const dialog = result[0],
-        user = result[1],
-        i = dialog.members.findIndex(el => el.id == user.id);
-        dialog.members.splice(i, 1);
-        dialog.save(err => {
-            if (err) return res.status(404).json(err);
-            return res.sendStatus(200);
-        });
-    })
-    .catch(err => res.status(404).json(err));
+	let partyDialog, user;
+
+	PartyDialog
+		.findById(matchedData(req).id)
+		.populate('creator', 'id')
+		.then(document => {
+			partyDialog = document;
+			if(partyDialog && partyDialog.creator.id === req.user.id) {
+				return User.findOne({login: matchedData(req).login})
+			}
+		})
+		.then(document => {
+			user = document;
+
+			if(user) {
+				let userIndexInPartyDialog = partyDialog.members.indexOf(user.id);
+				if(userIndexInPartyDialog) {
+					partyDialog.members.splice(userIndexInPartyDialog, 1);
+					return partyDialog.save();
+				}
+			}
+		})
+		.then(() => res.sendStatus(200))
+		.catch(err => res.status(404).json(err));
 }
 
 module.exports = {

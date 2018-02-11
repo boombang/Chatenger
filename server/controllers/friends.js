@@ -12,185 +12,170 @@ function getFriends(req, res) {
 	Friendship
 		.find({
 			$or: [{
-					'firstFriend.id': myId,
+					firstFriend: myId,
 				}, {
-					'secondFriendId.id': myId
+					secondFriend: myId
 				}]
 		})
+		.populate('firstFriend', 'login')
+		.populate('secondFriend', 'login')
 		.exec()
-		.then(result => {
-			const friends = result.map(note => note.firstFriend.id == myId ? note.secondFriend : note.firstFriend);
+		.then(documents => {
+			const friends = documents.map(document => {
+				let friend = document.firstFriend.id == myId ? document.secondFriend : document.firstFriend;
+				return {
+					id: friend.id,
+					login: friend.login
+				}
+			});
 			
-			return res.json({ friends });
+			res.json(friends);
 		})
-		.catch(err => res.status(404).json({ err }));
+		.catch(err => res.status(404).json(err));
+}
+
+function showFriendshipRequests(findStr, populateStr, req, res) {
+	FriendshipRequest
+		.find({ [findStr]: req.user.id })
+		.select(populateStr)
+		.populate(populateStr, 'login')
+		.exec()
+		.then(documents =>  {
+			let users = documents.map(document => {
+				return {
+					id: document[populateStr].id,
+					login: document[populateStr].login
+				}
+			});
+
+			res.json(users)
+		})
+		.catch(err => res.status(404).json(err));
 }
 
 function showFriendshipRequestsToMe(req, res) {
-	const myId = req.user.id;
-	
-	FriendshipRequest
-		.find({
-				'userRequestTo.id': myId
-		})
-		.select('userRequestFrom')
-		.exec()
-		.then(users =>  res.json({ users }))
-		.catch(err => res.status(404).json({ err }));
+	showFriendshipRequests('userRequestTo', 'userRequestFrom', req, res);
 }
 
 function showFriendshipRequestsFromMe(req, res) {
-	const myId = req.user.id;
-		
-  FriendshipRequest
-		.find({
-			'userRequestFrom.id': myId
-		})
-		.select('userRequestTo')
-		.exec()
-		.then(users => res.json({ users }))
-		.catch(err => res.status(404).json({ err }));
+	showFriendshipRequests('userRequestFrom', 'userRequestTo', req, res);
 }
 
 function removeFriendship(req, res) {
-	if(req.body.id && Number(req.body.id) < 1) return res.status(404).json({err: 'invalid id'});
+	if(!req.body.id) return res.status(404).json({err: 'id does not transfered'});
 
 	Friendship
 		.findOne({			
 			$or: [{
-					'firstFriend.id': req.body.id,
-					'secondFriend.id': req.user.id
+					firstFriend: req.body.id,
+					secondFriend: req.user.id
 				}, {
-						'firstFriend.id': req.user.id,
-						'secondFriend.id': req.body.id
+						firstFriend: req.user.id,
+						secondFriend: req.body.id
 				}]
 		})
 		.exec()
-		.catch(er => res.status(500).json({ err }))
 		.then(friendship => {
-			if(friendship) return Friendship.remove(friendship);
-			else return res.sendStatus(404);
+			if(friendship) return friendship.remove();
 		})
-		.catch(err => res.status(500).json({ err }))
-		.then(result => res.sendStatus(200));
+		.then(result => res.sendStatus(200))
+		.catch(err => res.status(500).json(err));
 }
 
 function sendFriendshipRequest(req, res) {
+	if(!req.body.id) return res.status(404).json({err: 'id does not transfered'});
+
 	const myId = req.user.id,
 			userId = req.body.id;
 
-	if(userId && Number(userId) < 1) return res.status(404).json({err: 'invalid id'});
-
 	FriendshipRequest
 		.findOne({
-			'userRequestFrom.id': myId,
-			'userRequestTo.id': userId
+			userRequestFrom: myId,
+			userRequestTo: userId
 		})
 		.exec()
-		.catch(err => res.sendStatus(404).json({ msg: 'database error' }))
 		.then(friendshipRequest => {
-			if (friendshipRequest) {
-				return res.sendStatus(404).json({
-						msg: 'friendshipRequest already exist'
-				});
-			} else {
+			if (!friendshipRequest) {
 				return FriendshipRequest
 					.create({
-						userIdRequestFrom: myId,
-						userIdRequestTo: userId
+						userRequestFrom: myId,
+						userRequestTo: userId
 					});
 			}
 		})
-		.catch(err => res.status(404).json({ msg: 'database error' }))
-		.then(friendshipRequest => res.sendStatus(200));
+		.then(friendshipRequest => {
+			if(friendshipRequest) res.sendStatus(200);
+		})
+		.catch(err => res.status(404).json(err));
+}
+
+function cancelFriendshipRequest(isToMe, req, res) {
+	if(!req.body.id) return res.status(404).json({err: 'id does not transfered'});
+
+	FriendshipRequest
+		.findOne({
+			userRequestTo: isToMe ? req.user.id : req.body.id,
+			userRequestFrom: isToMe ? req.body.id : req.user.id
+		})
+		.exec()
+		.then(friendshipRequest => {
+			if(friendshipRequest) return friendshipRequest.remove();			
+		})
+		.then(() =>  res.sendStatus(200))
+		.catch(err => res.status(404).json(err));
 }
 
 function cancelFriendshipRequestFromMe(req, res) {
-    if(req.body.id && Number(req.body.id) < 1) return res.status(404).json({err: 'invalid id'});
-
-		FriendshipRequest
-			.findOne({
-        'userRequestTo.id': req.body.id,
-        'userRequestFrom.id': req.user.id
-			})
-			.exec()
-			.catch(err =>  res.status(404).json({ err }))
-			.then(friendshipRequest => {
-				if(friendshipRequest) return FriendshipRequest.remove(friendshipRequest)
-				else return res.sendStatus(404);				
-			})
-			.catch(err => res.status(404).json({ err }))
-			.then(result => res.sendStatus(200));
+	cancelFriendshipRequest(false, req, res);
 }
 
 function cancelFriendshipRequestToMe(req, res) {
-    if(req.body.id && Number(req.body.id) < 1) return res.status(404).json({err: 'invalid id'});
-
-		FriendshipRequest
-			.findOne({
-        'userRequestTo.id': req.user.id,
-        'userRequestFrom.id': req.body.id
-			})
-			.exec()
-			.catch(err => res.status(404).json({ err }))
-			.then(friendshipRequest => {
-				if(friendshipRequest) return FriendshipRequest.remove(friendshipRequest)
-				else return res.sendStatus(404);					
-			})
-			.catch(err => res.status(404).json({ err }))
-			.then(result => res.sendStatus(200));
+	cancelFriendshipRequest(true, req, res);
 }
 
 function confirmFriendshipRequest(req, res) {
-    const myId = req.user.id,
-        userId = req.body.id;
+	if(!req.body.id) return res.status(404).json({err: 'id does not transfered'});
 
-    if(userId && Number(userId) < 1) return res.status(404).json({err: 'invalid id'});
+	const myId = req.user.id,
+			userId = req.body.id;
 
-		FriendshipRequest
-			.findOne({
-        'userRequestFrom.id': userId,
-        'userRequestTo.id': myId
-			})
-			.exec()
-			.catch(err => res.sendStatus(404).json({ msg: 'database error' }))
-			.then(friendshipRequest => {
-				if (friendshipRequest) {
-					const FriendshipRequestRemove = FriendshipRequest.remove({
-							'userRequestFrom.id': userId,
-							'userIdRequestTo.id': myId
-					});
-
-					const FriendshipCreate = Friendship.create({
-							firstFriend: {
-								id: myId,
-								login: req.user.login
-							},
-							secondFriend: {
-								id: userId,
-								login: friendshipRequest.userRequestFrom.id
-							}
-					}).exec();
-
-					return Promise.all([FriendshipRequestRemove, FriendshipCreate])
-			} else return res.status(404).json({ msg: 'friendshipRequest already not exist' });
+	FriendshipRequest
+		.findOne({
+			userRequestFrom: userId,
+			userRequestTo: myId
 		})
-		.catch(() => res.status(404).json({ msg: 'database error' }))
-		.then(() => res.sendStatus(200));
+		.exec()
+		.then(friendshipRequest => {
+			if (friendshipRequest) {
+				const FriendshipRequestRemove = friendshipRequest.remove();							
+
+				const FriendshipCreate = Friendship.create({
+						firstFriend: myId,
+						secondFriend: userId
+				});
+
+				return Promise.all([FriendshipRequestRemove, FriendshipCreate])
+			}
+	})
+	.then(() => res.sendStatus(200))
+	.catch(err => res.status(404).json(err));
 }
 
 function showBlackList(req, res) {
 	BlackList
-		.find({
-			'user.id': req.user.id
+		.find({user: req.user.id})
+		.populate('blackedUser', 'login')
+		.then(documents => {
+			let users =  documents.map(document => {
+				return {
+					id: document.blackedUser.id,
+					login: document.blackedUser.login
+				}
+			});
+
+			res.json(users);
 		})
-		.then(result => {
-				return result.map(note => users.push({
-					id: note.blackedUser.id,
-					login: note.blackedUser.login
-				}));
-		})
-		.catch(err => res.sendStatus(500).json({ msg: 'database error' }));
+		.catch(err => res.sendStatus(500).json(err));
 }
 
 
@@ -198,83 +183,75 @@ const addToBlackListValidation = [
     check("login").trim().isLength({min: 1, max: 30})
 ];
 
-function addToBlackList(req, res) {
-    if (!validationResult(req).isEmpty()) return res.status(404).json({err: validationResult.array()});
+async function addToBlackList(req, res) {
+	if (!validationResult(req).isEmpty()) return res.status(404).json({err: validationResult.array()});
+	
+	let queryUserId,
+		currentUserId = req.user.id;
 
-		User
+	await User
+	.findOne({ login: matchedData(req).login })
+	.exec()
+	.then(user => {
+		if(user) queryUserId = user.id;
+		else res.status(404).json({ msg: 'user not found' });
+	})
+	.catch(err => res.status(404).json(err));
+
+	if(res.headersSent) return res;
+
+	await BlackList
 		.findOne({
-        login: matchedData(req).login
+			blackedUser: queryUserId,
+			user: currentUserId
 		})
 		.exec()
-		.catch(err => res.sendStatus(404).json({ msg: 'database error' }))
-		.then(user => {
-			if(user) {
-				const myId = req.user.id,
-						userId = user.id;
+		.then(document => {						
+			if(!document) {
+			const queryPromises = [];
 
-				return BlackList
-					.findOne({
-						'blackedUser.id': userId,
-						'user.id': myId
-					})
-					.exec();
-			} else return res.status(404).json({ msg: 'user not found' });
-		})
-		.catch(err => res.sendStatus(404).json({ msg: 'database error' }))
-		.then(result => {						
-					if(!result) {
-					const queryPromises = [];
+			queryPromises.push(BlackList.create({
+					blackedUser: queryUserId,
+					user: currentUserId
+			}));
 
-					queryPromises.push(BlackList.create({
-							blackedUser: {
-								id: userId,
-								login: user.login
-							},
-							user: {
-								id: myId,
-								login: req.user.login
-							}
-					}));
+			queryPromises.push(Friendship.findOneAndRemove({
+				$or: [{
+								firstFriend: currentUserId,
+								secondFriend: queryUserId
+						}, {
+								firstFriend: queryUserId,
+								secondFriend: currentUserId
+						}]
+			}));
 
-					queryPromises.push(Friendship.findOneAndRemove({
-						$or: [{
-										'firstFriend.id': myId,
-										'secondFriend.id': userId
-								}, {
-										'firstFriend.id': userId,
-										'secondFriend.id': myId
-								}]
-					}));
+			queryPromises.push(FriendshipRequest.findOneAndRemove({
+				$or: [{
+								userRequestTo: currentUserId,
+								userRequestFrom: queryUserId
+						}, {
+								userRequestTo: queryUserId,
+								userRequestFrom: currentUserId
+						}]
+			}));
 
-					queryPromises.push(FriendshipRequest.findOneAndRemove({
-							$or: [{
-											'userRequestTo.id': myId,
-											'userRequestFrom.id': userId
-									}, {
-											'userRequestTo.id': userId,
-											'userRequestFrom.id': myId
-									}]
-					}));
-
-					Promise.all(queryPromises)
-							.then(result => res.sendStatus(200))
-							.catch(err => res.status(404).json({ err }));
-			}
-			else return result => res.sendStatus(200);//уже добавили
-		})
-		.catch(err => res.sendStatus(404).json({ msg: 'database error' }))
+			return Promise.all(queryPromises);
+		}
+	})
+	.then(result => res.sendStatus(200))
+	.catch(err => res.sendStatus(404).json(err));
 }
 
 function removeFromBlackList(req, res) {
-    if(req.body.id && Number(req.body.id) < 1) return res.status(404).json({err: 'invalid id'});
+	if(!req.body.id) return res.status(404).json({err: 'id does not transfered'});
 
-		BlackList
-			.findOneAndRemove({
-        'blackedUser.id': req.body.id,
-        'user.id': req.user.id
-			})
-			.then(() => res.sendStatus(200))
-			.catch(err => res.status(500).json({ err }))
+	BlackList
+		.findOneAndRemove({
+			blackedUser: req.body.id,
+			user: req.user.id
+		})
+		.then(() => res.sendStatus(200))
+		.catch(err => res.status(500).json({ err }))
 }
 
 module.exports = {

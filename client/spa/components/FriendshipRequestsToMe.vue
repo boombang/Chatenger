@@ -32,8 +32,8 @@ import axios from "axios";
       this.$emit('loadStart');
       axios
       .get("/friends/showFriendshipRequestsToMe")
-      .then(response => {
-        this.users = response.data.users;
+      .then(({data}) => {
+        this.users = data;
         this.$emit('loadEnd');
       })
       .catch(error => {

@@ -33,6 +33,9 @@
       submitOk(e) {
         this.$emit('chatLoad');
         this.$router.push("/blackList");
+      },
+      submitBad(e) {
+        this.$emit('chatLoad');
       }
     },
     components: {

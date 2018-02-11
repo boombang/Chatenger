@@ -1,5 +1,5 @@
 let mongoose = require("mongoose");
-let autoIncrement = require("mongoose-auto-increment");
+// let autoIncrement = require("mongoose-auto-increment");
 module.exports = function () {
   let db;
 
@@ -7,9 +7,7 @@ module.exports = function () {
 
   if (mongoose.connection.readyState !== 1) {
     console.log('Connecting to Mongo...');
-    db = mongoose.connect('mongodb://localhost/chatengerdb', {
-      useMongoClient: true,
-    }, (err) => {
+    db = mongoose.connect('mongodb://localhost/chatengerdb', { autoIndex: process.env.NODE_ENV === "development" }, err => {
       if (err) {
         console.log('Could not connect to MongoDB!');
         console.log(err);
@@ -22,9 +20,7 @@ module.exports = function () {
       if (err.message.code === "ETIMEDOUT") {
         console.log("Mongo connection timeout!", err);
         setTimeout(() => {
-          mongoose.connect('mongodb://localhost/chatengerdb', {
-            useMongoClient: true,
-          });
+          mongoose.connect('mongodb://localhost/chatengerdb');
         }, 1000);
         return;
       }
@@ -36,7 +32,7 @@ module.exports = function () {
     	Maybe change to 
     		https://github.com/icebob/mongoose-autoincrement
      */
-    autoIncrement.initialize(db);
+    // autoIncrement.initialize(db);
 
     mongoose.connection.once("open", function mongoAfterOpen() {
       console.log('Mongo DB connected.');

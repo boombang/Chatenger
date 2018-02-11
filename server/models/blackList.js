@@ -3,30 +3,17 @@
 let mongoose = require("mongoose");
 let Schema = mongoose.Schema;
 
-
 let blackListSchema = new Schema({
   blackedUser: {
-    id: {
-      type: Number,
-      required: true
-    },
-    login: {
-      type: String,
-      required: true
-    }
+    type: Schema.Types.ObjectId, 
+    ref: 'User',
+    required: true
   },
   user: {
-    id: {
-      type: Number,
-      required: true
-    },
-    login: {
-      type: String,
-      required: true
-    }
+    type: Schema.Types.ObjectId, 
+    ref: 'User',
+    required: true
   }
-}, {
-  versionKey: false
 });
 
 let blackList = mongoose.model("BlackList", blackListSchema);

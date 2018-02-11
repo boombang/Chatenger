@@ -3,7 +3,7 @@ const router = require('express').Router();
 const controller = require('../controllers/profile');
 
 module.exports = function (app) {
-  router.route('/getUserData/:id?').get(controller.getUserData);
+  router.route('/getUserData/:login?').get(controller.getUserData);
 
   router.route('/changePassword').post(controller.changePassword.validation, controller.changePassword.method);
 

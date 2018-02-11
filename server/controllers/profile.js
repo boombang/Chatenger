@@ -1,182 +1,122 @@
 const 
   { check, validationResult } = require('express-validator/check'),
   { matchedData } = require('express-validator/filter'),
-  crypto = require("crypto");
+  crypto = require("crypto"),
+  mongoose = require('mongoose'),
 
-const User = require('../models/user');
-const Friendship = require('../models/friendship');
-const FriendshipRequest = require('../models/friendshipRequest');
-const BlackList = require('../models/blackList');
+  User = require('../models/user');
+  Friendship = require('../models/friendship');
+  FriendshipRequest = require('../models/friendshipRequest');
+  BlackList = require('../models/blackList');
 
-// function getUserData(req, res) {
-//   const myId = req.user.id,
-//     actualId = req.params.id;
-//   if (!actualId) {
-//     return res.json({
-//       userId: req.user.id,
-//       userLogin: req.user.login
-//     });
-//   } else {
-//     if(Number(actualId) < 1) return res.status(404).json({err: 'invalid id'});
-//     User
-//       .findById(actualId)
-//       .catch(err => res.status(500).json({ msg: 'database error (User.findById)' }))
-//       .then(user => {
-//         if (!user) return res.status(404).json({ msg: 'user not found' });
-
-//         const userId = user.id;
-//          Friendship
-//           .findOne({
-//             $or: [
-//               {
-//                 'firstFriend.id': myId,
-//                 'secondFriend.id': userId
-//               }, {
-//                 'firstFriend.id': userId,
-//                 'secondFriend.id': myId
-//               }
-//             ]
-//           })
-//           .exec()
-//           .catch(err => res.status(500).json({ msg: 'database error (Friendship.findOne)' }))
-//           .then(friendship => {
-//             if (friendship) return res.json({ id: user.id, login: user.login, userType: "friend" });
-
-//             FriendshipRequest.findOne({
-//               $or: [
-//                 {
-//                   'userRequestTo.id': myId,
-//                   'userRequestFrom.id': userId
-//                 }, {
-//                   'userRequestTo.id': userId,
-//                   'userRequestFrom.id': myId
-//                 }
-//               ]
-//             })
-//             .catch(err => res.status(404).json({ msg: 'database error (FriendshipRequest.findOne)' }))
-//             .then(friendshipRequest => {
-//               if (friendshipRequest) {
-//                 return friendshipRequest.userIdRequestTo == myId
-//                   ? res.json({ id: user.id, login: user.login, userType: "frReqToMe" })
-//                   : res.json({ id: user.id, login: user.login, userType: "frReqFromMe" });
-//               } else {
-//                 BlackList
-//                   .findOne({
-//                     $or: [{
-//                         'user.id': myId,
-//                         'blackedUser.id': userId
-//                       }, {
-//                         'user.id': userId,
-//                         'blackedUser.id': myId
-//                       }]
-//                 })
-//                 .catch(err => res.status(404).json({ msg: 'database error (BlackList.findOne)' }))
-//                 .then(blackListNote => {
-//                   if (blackListNote) {
-//                     return blackListNote.blackedUserId == myId
-//                       ? res.json({ id: user.id, login: user.login, uBlacked: true })
-//                       : res.json({ id: user.id, login: user.login, uBlacked: false });
-//                   } else {
-//                     res.json({ id: user.id, login: user.login, userType: "other" })
-//                   }
-//                 })
-//               }
-//             })
-//           })
-//       })
-//   }
-// }
-
-// function getUserData(req, res) {
-//   const myId = req.user.id,
-//     actualId = req.params.id;
-//   if (!actualId) {
-//     return res.json({
-//       userId: req.user.id,
-//       userLogin: req.user.login
-//     });
-//   } else {
-//     if(Number(actualId) < 1) return res.status(404).json({err: 'invalid id'});
-
-//     let userId;
+async function getUserData(req, res) {
+  const actualLogin = req.params.login;
+  if (!actualLogin) {
+    return res.json({
+      userId: req.user.id,
+      userLogin: req.user.login
+    });
+  } else {
+    let currentId = req.user.id,
+      queryUser;
     
-//     User
-//       .findById(actualId)
-//       .catch(err => res.status(500).json({ msg: 'database error (User.findById)' }))
-//       .then(user => {
-//         if (!user) return res.status(404).json({ msg: 'user not found' });
+    await User
+      .findOne({ login: actualLogin })
+      .select('id login')
+      .then(user => {
+        if (!user) res.status(404).json({ msg: 'user not found' });
+        else queryUser = user;
+      })
+      .catch(err => res.status(400).json(err));
 
-//         userId = user.id;
-//         return Friendship
-//           .findOne({
-//             $or: [
-//               {
-//                 'firstFriend.id': myId,
-//                 'secondFriend.id': userId
-//               }, {
-//                 'firstFriend.id': userId,
-//                 'secondFriend.id': myId
-//               }
-//             ]
-//           })
-//           .exec();
-//       })
-//       .catch(err => res.status(500).json({ msg: 'database error (Friendship.findOne)' }))
-//       .then(friendship => {
-//         if (friendship) {
-//           return res.json({
-//             id: user.id,
-//             login: user.login,
-//             userType: "friend"
-//           });
-//         }
+      if(res.headersSent) return res;
 
-//         return FriendshipRequest.findOne({
-//           $or: [
-//             {
-//               'userRequestTo.id': myId,
-//               'userRequestFrom.id': userId
-//             }, {
-//               'userRequestTo.id': userId,
-//               'userRequestFrom.id': myId
-//             }
-//           ]
-//         }).exec();
-//       })
-//       .catch(err => {
-//         res.status(405).json({ msg: 'database error (FriendshipRequest.findOne)' })
-//       })
-//       // .catch(err => res.status(405).json({ err }))
-//       .then(friendshipRequest => {
-//           if (friendshipRequest) {
-//             return friendshipRequest.userIdRequestTo == myId
-//               ? res.json({ id: user.id, login: user.login, userType: "frReqToMe" })
-//               : res.json({ id: user.id, login: user.login, userType: "frReqFromMe" });
-//           } else {
-//             return BlackList
-//               .findOne({
-//                 $or: [{
-//                     'user.id': myId,
-//                     'blackedUser.id': userId
-//                   }, {
-//                     'user.id': userId,
-//                     'blackedUser.id': myId
-//                   }]
-//               }).exec();
-//           }
-//       })
-//       .catch(err => res.status(404).json({ msg: 'database error (BlackList.findOne)' }))
-//       .then(blackListNote => {
-//         if (blackListNote) {
-//           return blackListNote.blackedUserId == myId
-//             ? res.json({ id: user.id, login: user.login, uBlacked: true })
-//             : res.json({ id: user.id, login: user.login, uBlacked: false });
-//         } else {
-//           res.json({ id: user.id, login: user.login, userType: "other" })
-//         }
-//       })
-//   }
-// }
+      await Friendship
+        .findOne({
+          $or: [
+            {
+              firstFriend: currentId,
+              secondFriend: queryUser.id
+            }, {
+              firstFriend: queryUser.id,
+              secondFriend: currentId
+            }
+          ]
+        })
+        .exec()
+        .then(friendship => {
+          if (friendship) {
+            res.json({
+              id: queryUser.id,
+              login: queryUser.login,
+              userType: "friend"
+            });
+          }
+        })
+        .catch(err => res.status(400).json(err));
+
+      if(res.headersSent) return res;
+
+      await FriendshipRequest.findOne({
+        $or: [
+          {
+            userRequestTo: currentId,
+            userRequestFrom: queryUser.id
+          }, {
+            userRequestTo: queryUser.id,
+            userRequestFrom: currentId
+          }
+        ]
+      })
+      .populate('userRequestTo', 'id')
+      .exec()
+      .then(friendshipRequest => {
+          if (friendshipRequest) {
+            let json = { 
+              id: queryUser.id, 
+              login: queryUser.login
+            }
+
+            friendshipRequest.userRequestTo.id === currentId
+              ? json.userType = 'frReqToMe'
+              : json.userType = 'frReqFromMe';
+
+            res.json(json);
+          }
+      })
+      .catch(err => res.status(400).json(err));
+
+      if(res.headersSent) return res;
+
+      await BlackList
+        .findOne({
+          $or: [{
+              user: currentId,
+              blackedUser: queryUser.id
+            }, {
+              user: queryUser.id,
+              blackedUser: currentId
+            }]
+        })
+        .populate('blackedUser', 'id')
+        .exec()
+        .then(blackListNote => {
+          let json = {
+            id: queryUser.id, 
+            login: queryUser.login
+          }
+          if (blackListNote) {
+            blackListNote.blackedUser.id == currentId
+              ? json.uBlacked = true
+              : json.uBlacked = false;
+          }
+          else json.userType = 'other';
+
+          res.json(json);
+        })
+        .catch(err => res.status(400).json(err));
+  }
+}
 
 const changePasswordValidation = [
 	check(["oldPassword", "newPassword", "confirmNewPassword"]).isLength({min: 1, max: 40}),
@@ -193,7 +133,7 @@ function changePassword(req, res) {
 
   if (crypto.pbkdf2Sync(req.body.oldPassword, req.user.salt, 10000, 512, 'sha512') != req.user.password) {
     return res.status(422).json({
-      message: 'Incorrect old password '
+      message: 'Incorrect old password'
     });
   }
 
