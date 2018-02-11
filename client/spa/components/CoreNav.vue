@@ -1,13 +1,13 @@
 <template>
-  <div class="main-nav">
+  <div class="nav">
     <router-link class="link" v-for="item in homeNavProps" :key="item.id" :to="item.path()" @click.native="item.clickHandler">{{item.name}}</router-link>
-    <a class="link" href="/auth/logout">Выйти</a>
+    <a class="link" href="/auth/logout">Logout</a>
   </div>
 </template>
 
 <script>
   export default {
-    name: "main-nav",
+    name: "core-nav",
     props: {
       homeNavProps: {
         type: Array,
@@ -19,7 +19,7 @@
 </script>
 
 <style scoped>
-  .main-nav {
+  .nav {
     display: flex;
     align-items: center;
     padding: 10px 30px;

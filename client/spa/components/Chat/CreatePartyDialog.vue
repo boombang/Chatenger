@@ -7,7 +7,7 @@
 </template>
 
 <script>
-  import SimpleForm from "./SimpleForm.vue";
+  import SimpleForm from "../Simple/SimpleForm.vue";
 
   export default {
     name: "create-party-dialog",

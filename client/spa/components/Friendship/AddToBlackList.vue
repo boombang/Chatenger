@@ -6,7 +6,7 @@
 </template>
 
 <script>
-  import SimpleForm from './SimpleForm';
+  import SimpleForm from '../Simple/SimpleForm';
 
   export default {
     name: 'add-to-black-list',

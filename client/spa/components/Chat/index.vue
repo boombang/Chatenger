@@ -12,7 +12,7 @@
     </div>
     <template v-show="connection">
       <div class="chat__messages">
-        <div class="chat__message" v-for="message in messages">{{message}}</div>
+        <div class="chat__message" v-for="message in messages" :key="message">{{message}}</div>
       </div>
       <div class="chat__writing">
         <textarea class="textarea" placeholder="Напишите сообщение..." id="chat-input" v-model="message"></textarea>
@@ -95,60 +95,11 @@
         this.socketDialogName = `${dialogType}-${dialogId}`;
 
         this.socket.emit('join room', this.socketDialogName);
-
-        // this.connection.onClosed = function (e) {
-        //   if (e) {
-        //     this.messages.push('Connection closed with error: ' + e);
-        //   } else {
-        //     this.messages.push('Disconnected');
-        //   }
-        // };
-
-        // this.connection.on('SetUsersOnline', usersOnline => {
-        //   usersOnline.forEach(user => this.addUserOnline(user));
-        // });
-
-        // this.connection.on('UsersJoined', users => {
-        //   users.forEach(user => {
-        //     this.messages.push('Пользователь ' + user.Name + ' присоединился к чату');
-        //     this.addUserOnline(user);
-        //   });
-        // });
-
-        // this.connection.on('UsersLeft', users => {
-        //   users.forEach(user => {
-        //     this.messages.push('Пользователь ' + user.Name + ' покинул чат');
-        //   });
-        // });
-
-        // this.connection.on('Send', (userName, message) => {
-        //   this.messages.push(userName + ': ' + message);
-        // });
-
-        // this.connection.start(this.transportType).catch((err) => {
-        //   console.log(err);
-        // });
       },
 
       sendMessage() {
         this.socket.emit('chat message', this.message);
         this.message = '';
-      },
-
-      addUserOnline(user) {
-        this.users.push(user);
-      },
-
-      getParameterByName(name, url) {
-        if (!url) {
-          url = window.location.href;
-        }
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-          results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
       }
     },
     components: {

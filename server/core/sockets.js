@@ -13,7 +13,7 @@ let sockets = {
         currentRoom = '';
     
         io.on('connection', socket => {
-            console.log('a user connected');
+            console.log('user connected');
 
             socket.on('disconnect', () => console.log('user disconnected'));
 

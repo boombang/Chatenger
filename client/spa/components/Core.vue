@@ -1,16 +1,16 @@
 <template>
   <div class="home">
     <template>
-      <preloader class="nav" :preloaderProps="preloadersProps.homeNav" v-show="!homeNavReady"></preloader>
-      <main-nav class="nav" :homeNavProps="homeNavProps" v-show="homeNavReady"></main-nav>
+      <preloader class="nav" :preloaderProps="preloadersProps.homeNav" v-show="!homeNavReady"/>
+      <core-nav class="nav" :homeNavProps="homeNavProps" v-show="homeNavReady"/>
     </template>
     <template>
-      <preloader :preloaderProps="preloadersProps.chat" v-show="!chatReady"></preloader>
-      <chat class="half" v-if="userInit" v-show="chatReady" @chatReady="chatReadyHandler()" :reinitChat="reinitChat"></chat>
+      <preloader :preloaderProps="preloadersProps.chat" v-show="!chatReady"/>
+      <chat class="half" v-if="userInit" v-show="chatReady" @chatReady="chatReadyHandler()" :reinitChat="reinitChat"/>
     </template>
     <template>
-      <preloader :preloaderProps="preloadersProps.router" v-show="!mainReady"></preloader>
-      <router-view class="half" @chatLoad="chatLoad()" @loadStart="loadStart()" @loadEnd="loadEnd()" v-if="userInit" v-show="mainReady"></router-view>
+      <preloader :preloaderProps="preloadersProps.router" v-show="!mainReady"/>
+      <router-view class="half" @chatLoad="chatLoad()" @loadStart="loadStart()" @loadEnd="loadEnd()" v-if="userInit" v-show="mainReady"/>
     </template>
   </div>
 </template>
@@ -18,12 +18,12 @@
 <script>
   import axios from 'axios';
 
-  import Chat from "./Chat.vue";
-  import MainNav from "./MainNav.vue";
-  import Preloader from "./Preloader";
+  import Chat from "./Chat";
+  import CoreNav from "./CoreNav";
+  import Preloader from "./Simple/Preloader";
 
   export default {
-    name: 'main',
+    name: 'core',
     data() {
       return {
         chatReady: false,
@@ -32,12 +32,12 @@
         userInit: false,
         reinitChat: false,
         homeNavProps: [{
-          name: 'Профиль',
+          name: 'Profile',
           path: () => `/profile/${this.$store.state.userLogin}`,
           clickHandler: () => {}
         }, {
-          name: 'Друзья',
-          path: () => '/friends',
+          name: 'Friends',
+          path: () => '/friendship',
           clickHandler: () => {}
         }],
         preloadersProps: {
@@ -88,7 +88,7 @@
     },
     components: {
       Chat,
-      MainNav,
+      CoreNav,
       Preloader
     }
   }

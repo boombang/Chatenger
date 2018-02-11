@@ -1,19 +1,19 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Main from 'components/Main'
-import Profile from 'components/Profile'
-import EditProfile from 'components/EditProfile'
-import ChangePassword from 'components/ChangePassword'
-import DeleteAccount from 'components/DeleteAccount'
-import Friends from 'components/Friends'
-import BlackList from 'components/BlackList'
-import AddToBlackList from 'components/AddToBlackList'
-import FriendshipRequestsToMe from 'components/FriendshipRequestsToMe'
-import FriendshipRequestsFromMe from 'components/FriendshipRequestsFromMe'
-import CreatePartyDialog from 'components/CreatePartyDialog'
-import AddUserToPartyDialog from 'components/AddUserToPartyDialog'
-import DeleteUserFromPartyDialog from 'components/DeleteUserFromPartyDialog'
-import DialogSettings from 'components/DialogSettings'
+import Core from 'components/Core'
+import Profile from 'components/Profile/index'
+import EditProfile from 'components/Profile/EditProfile'
+import ChangePassword from 'components/Profile/ChangePassword'
+import DeleteAccount from 'components/Profile/DeleteAccount'
+import Friendship from 'components/Friendship'
+import BlackList from 'components/Friendship/BlackList'
+import AddToBlackList from 'components/Friendship/AddToBlackList'
+import FriendshipRequestsToMe from 'components/Friendship/FriendshipRequestsToMe'
+import FriendshipRequestsFromMe from 'components/Friendship/FriendshipRequestsFromMe'
+import CreatePartyDialog from 'components/Chat/CreatePartyDialog'
+import AddUserToPartyDialog from 'components/Chat/AddUserToPartyDialog'
+import DeleteUserFromPartyDialog from 'components/Chat/DeleteUserFromPartyDialog'
+import DialogSettings from 'components/Chat/DialogSettings'
 
 Vue.use(Router)
 
@@ -28,7 +28,7 @@ function emptyLogin(to, from, next) {
 export default new Router({
   routes: [{
     path: '/',
-    component: Main,
+    component: Core,
     children: [{
       path: 'profile/:login',
       component: Profile,
@@ -43,8 +43,8 @@ export default new Router({
       path: 'deleteaccount',
       component: DeleteAccount
     }, {
-      path: 'friends',
-      component: Friends
+      path: 'friendship',
+      component: Friendship
     }, {
       path: 'fr-req-to-me',
       component: FriendshipRequestsToMe
